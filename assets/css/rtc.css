@@ -1,0 +1,379 @@
+/* ============================================================
+   RTC Comparativo — estilos do módulo
+   ============================================================ */
+
+/* ---------- empresas ---------- */
+.nx-emp-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nx-emp { display: flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 4px 8px 4px 4px; background: rgba(250, 237, 229, 0.015); transition: border-color .2s, background .2s; }
+.nx-emp.is-active { border-color: rgba(247, 81, 31, 0.55); background: var(--brand-wash); }
+.nx-emp-main { flex: 1; min-width: 0; text-align: left; background: transparent; border: 0; color: var(--ink); padding: 8px; cursor: pointer; border-radius: 9px; display: flex; flex-direction: column; gap: 2px; }
+.nx-emp-main strong { font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nx-emp-main span { font-size: 0.75rem; color: var(--ink-dim); }
+.nx-emp-main small { font-size: 0.7rem; color: var(--ink-mute); }
+.nx-sim-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nx-sim-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.nx-sim-list li div { display: flex; flex-direction: column; min-width: 0; }
+.nx-sim-list li span { font-size: 0.76rem; color: var(--ink-mute); }
+
+/* ---------- Simples Nacional ---------- */
+.nx-sn { display: flex; flex-direction: column; gap: 14px; margin: 6px 0 12px; }
+.nx-formula-box { border: 1px solid rgba(247, 81, 31, 0.35); border-radius: 14px; padding: 14px 16px; background: linear-gradient(160deg, rgba(247, 81, 31, 0.08), transparent 70%); margin-bottom: 14px; }
+.nx-formula { font-family: var(--font-mono); font-size: 0.86rem; color: var(--ink); margin-top: 6px; overflow-wrap: anywhere; }
+.nx-formula.is-num { color: var(--brand-soft); font-size: 0.82rem; }
+.nx-divisor { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.nx-divisor li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border-radius: 8px; background: rgba(250, 237, 229, 0.03); font-size: 0.78rem; }
+.nx-divisor li span { color: var(--ink-dim); }
+.nx-divisor li b { font-variant-numeric: tabular-nums; }
+.nx-divisor li.is-total { background: var(--brand-wash); }
+
+/* ---------- operação ---------- */
+.nx-subsec { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; }
+.nx-subsec h3 { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-soft); margin-bottom: 12px; }
+.nx-auto { display: block; font-size: 0.8rem; color: var(--ink-dim); padding: 7px 10px; border-radius: 9px; background: rgba(87, 201, 138, 0.06); border: 1px solid rgba(87, 201, 138, 0.18); }
+.nx-auto b { color: var(--ink); margin-right: 4px; }
+.nx-auto.is-missing { background: rgba(242, 184, 75, 0.07); border-color: rgba(242, 184, 75, 0.3); }
+.nx-auto.is-missing b { color: var(--warn); }
+p.nx-auto { margin: 4px 0 0; }
+.nx-regra-info { font-size: 0.82rem; color: var(--ink-dim); padding: 10px 12px; border-radius: 10px; background: rgba(255, 162, 102, 0.06); border: 1px solid rgba(255, 162, 102, 0.2); margin: 6px 0 0; }
+.nx-despesas { display: flex; flex-direction: column; gap: 6px; margin: 14px 0 10px; }
+.nx-despesa { display: flex; gap: 10px; align-items: flex-end; }
+.nx-despesa .nx-field.w-lg { flex: 2 1 260px; }
+.nx-details { padding: 0; }
+.nx-details > summary { list-style: none; cursor: pointer; padding: 16px 20px; display: flex; flex-direction: column; gap: 2px; }
+.nx-details > summary::-webkit-details-marker { display: none; }
+.nx-details > summary strong { font-family: var(--font-display); font-size: 1.05rem; }
+.nx-details > summary small { color: var(--ink-mute); font-size: 0.8rem; }
+.nx-details > summary::after { content: "+"; position: absolute; right: 20px; top: 18px; font-size: 1.3rem; color: var(--brand-bright); }
+.nx-details[open] > summary::after { content: "−"; }
+.nx-details .nx-card-body { padding-top: 0; }
+
+/* painel lateral */
+.nx-side-sum, .nx-side-alerts { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.nx-side-sum { border-color: rgba(247, 81, 31, 0.35); box-shadow: 0 0 40px -18px rgba(255, 114, 40, 0.45); }
+.nx-side-sum h3, .nx-side-alerts h3 { font-size: 0.98rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.nx-dl { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.nx-dl dt { font-size: 0.72rem; color: var(--ink-mute); margin-top: 8px; font-family: var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.nx-dl dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-size: 0.8rem; color: var(--ink-dim); }
+.nx-dl dd b { color: var(--ink); font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.nx-dl dd .is-27 b { color: var(--brand-soft); }
+.nx-dl dd em { font-style: normal; font-family: var(--font-mono); font-size: 0.74rem; color: var(--brand-soft); background: var(--brand-wash); padding: 1px 6px; border-radius: 6px; }
+.nx-side-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.nx-count { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
+.nx-count.is-erro { background: rgba(255, 107, 91, 0.16); color: var(--danger); }
+.nx-count.is-alerta { background: rgba(242, 184, 75, 0.15); color: var(--warn); }
+.nx-count.is-ok { background: rgba(87, 201, 138, 0.14); color: var(--ok); }
+.nx-side-alerts .nx-alerts li { font-size: 0.77rem; }
+
+/* ---------- custo e preço ---------- */
+.nx-naorec { margin-top: 14px; }
+.nx-naorec h4 { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+.nx-naorec ul { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 10px; }
+.nx-naorec li { display: flex; justify-content: space-between; padding: 7px 10px; font-size: 0.82rem; border-bottom: 1px solid var(--line); }
+.nx-naorec li:last-child { border-bottom: 0; }
+.nx-naorec li b { font-variant-numeric: tabular-nums; }
+.nx-naorec li.is-total { background: rgba(250, 237, 229, 0.03); font-weight: 600; }
+.nx-totais { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-top: 12px; }
+.nx-totais > div { display: flex; flex-direction: column; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.nx-totais span { font-size: 0.72rem; color: var(--ink-mute); }
+.nx-totais b { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.nx-totais .is-total { border-color: rgba(247, 81, 31, 0.45); background: var(--brand-wash); }
+.nx-totais .is-total b { color: var(--brand-soft); }
+.nx-period .nx-table-wrap + .nx-table-wrap { margin-top: 12px; }
+.nx-blocked { padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 107, 91, 0.45); background: rgba(255, 107, 91, 0.07); }
+.nx-blocked b { color: var(--danger); }
+.nx-blocked p { margin: 6px 0 0; color: var(--ink-dim); font-size: 0.86rem; }
+.nx-cmp tbody th small { color: var(--ink-mute); font-size: 0.72rem; font-weight: 400; }
+.nx-premissas { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.84rem; color: var(--ink-dim); }
+
+/* ---------- gráficos ---------- */
+.nx-chart-box { width: 100%; min-height: 120px; }
+.nx-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 10px; font-size: 0.78rem; color: var(--ink-dim); }
+.nx-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.nx-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.nx-chart { display: block; overflow: visible; }
+.nx-chart .nx-grid { stroke: rgba(250, 237, 229, 0.08); stroke-width: 1; shape-rendering: crispEdges; }
+.nx-chart .nx-baseline { stroke: rgba(250, 237, 229, 0.28); stroke-width: 1; shape-rendering: crispEdges; }
+.nx-chart .nx-axis { fill: var(--ink-mute); font-size: 10.5px; font-variant-numeric: tabular-nums; font-family: var(--font-body); }
+.nx-chart .nx-cat { fill: var(--ink-dim); font-size: 12px; font-family: var(--font-body); }
+.nx-chart .nx-delta { fill: var(--ink-dim); font-size: 11px; font-family: var(--font-mono); }
+.nx-chart .nx-total { fill: var(--ink); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; font-family: var(--font-body); }
+.nx-chart .nx-inlabel { font-size: 10.5px; font-weight: 600; font-family: var(--font-body); pointer-events: none; }
+.nx-chart .nx-mark { transition: filter .15s; }
+.nx-chart .nx-mark.is-hover { filter: brightness(1.18); }
+.nx-chart .nx-hit { fill: transparent; cursor: default; outline: none; }
+.nx-chart .nx-hit.is-hover, .nx-chart .nx-hit:focus { fill: rgba(250, 237, 229, 0.035); }
+
+/* ---------- relatório ---------- */
+.nx-report { display: flex; flex-direction: column; gap: 20px; }
+.nx-report-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.nx-report-head { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; border-top: 3px solid var(--brand); }
+.nx-report-brand { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
+.nx-report-brand h2 { font-size: 1.3rem; margin-top: 4px; }
+.nx-report-meta { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px 20px; }
+.nx-report-meta div { border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.nx-report-meta dt { font-size: 0.7rem; color: var(--ink-mute); font-family: var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.nx-report-meta dd { margin: 2px 0 0; font-size: 0.86rem; }
+.nx-report-sec { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+.nx-report-sec h3 { font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.nx-report-sec h3::before { content: ""; width: 4px; height: 18px; border-radius: 2px; background: var(--grad); box-shadow: var(--glow-sm); }
+.nx-report-sec p { color: var(--ink-dim); margin: 0 0 8px; max-width: 120ch; }
+.nx-memo { font-size: 0.76rem; min-width: 1180px; }
+.nx-memo td { padding: 6px 8px; }
+.nx-memo .c-item { font-weight: 600; min-width: 170px; }
+.nx-memo .c-form { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-dim); min-width: 220px; }
+.nx-memo .c-valor { font-weight: 600; }
+.nx-memo .c-fund { min-width: 200px; color: var(--ink-dim); }
+.nx-memo .c-obs { min-width: 220px; color: var(--ink-mute); }
+.nx-leis { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.nx-leis li { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.nx-leis li div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; align-items: baseline; }
+.nx-leis li strong { font-size: 0.86rem; }
+.nx-leis li p { margin: 6px 0 0; font-size: 0.78rem; color: var(--ink-mute); }
+.nx-nat-lei { font-size: 0.66rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-mute); }
+.nx-nat-lei.n-estimativa { color: var(--warn); }
+.nx-nat-lei.n-administrativo { color: var(--info); }
+.nx-nat-lei.n-jurisprudencia { color: var(--brand-soft); }
+.nx-disclaimer { font-size: 0.78rem; color: var(--ink-mute); border-left: 3px solid var(--brand); padding: 8px 12px; margin: 0; }
+
+/* ---------- parâmetros ---------- */
+.nx-param-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; flex-wrap: wrap; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-card); }
+.nx-param-top p { margin: 4px 0 0; }
+.nx-regras { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.nx-regra { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.nx-regra strong { margin-right: 8px; }
+.nx-regra p { margin: 6px 0 0; font-size: 0.82rem; color: var(--ink-dim); }
+.nx-regra details { margin-top: 8px; font-size: 0.78rem; color: var(--ink-mute); }
+.nx-codes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.nx-codes code { background: rgba(250, 237, 229, 0.05); padding: 2px 6px; border-radius: 6px; }
+
+/* ---------- impressão (Salvar como PDF) ---------- */
+/* ---------- análise (operação completa × produto; quantidade total × unidade) ---------- */
+.nx-analise .nx-card-body { display: flex; flex-direction: column; gap: 12px; }
+.nx-analise .nx-card-body > .nx-field { margin-bottom: 0; }
+.nx-analise .nx-note, .nx-analise .nx-auto { margin: 0; }
+/* barra compacta "O que analisar": os filtros numa linha, as opções em pílulas */
+.nx-filtro { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.nx-filtro-linha { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 22px; }
+.nx-filtro-linha > .nx-field { margin: 0; min-width: 0; }
+.nx-filtro .nx-auto { margin: 0; }
+.nx-field.w-auto { flex: 0 1 auto; }
+.nx-seg.is-compact { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; border-radius: 11px; max-width: 100%; }
+.nx-seg.is-compact .nx-seg-opt { flex: 0 1 auto; min-width: 0; max-width: 280px; padding: 6px 12px; border-radius: 8px; }
+.nx-seg.is-compact .nx-seg-opt > span { display: block; min-width: 0; }
+.nx-seg.is-compact .nx-seg-opt strong { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-dim); }
+.nx-seg.is-compact .nx-seg-opt:hover strong { color: var(--ink); }
+.nx-seg.is-compact .nx-seg-opt.is-on { box-shadow: inset 0 0 0 1px rgba(255, 114, 40, 0.2); }
+.nx-seg.is-compact .nx-seg-opt.is-on strong { color: var(--brand-soft); font-weight: 600; }
+@media (max-width: 560px) { .nx-filtro-linha > .nx-field { flex: 1 1 100%; } .nx-seg.is-compact { display: flex; } .nx-seg.is-compact .nx-seg-opt { flex: 1 1 auto; max-width: none; } }
+
+/* resposta da tela numa frase, antes dos detalhes */
+.nx-resposta { padding: 14px 18px; border-radius: var(--radius); border: 1px solid var(--line); border-left: 3px solid var(--brand-bright); background: linear-gradient(100deg, rgba(247, 81, 31, 0.09), rgba(28, 26, 24, 0.35) 65%); }
+.nx-resposta.is-ruim { border-left-color: var(--warn); }
+.nx-resposta.is-bom { border-left-color: var(--ok); }
+.nx-resposta p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: var(--ink); max-width: 110ch; }
+.nx-resposta p b { color: var(--brand-soft); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nx-resposta small { display: block; margin-top: 5px; color: var(--ink-dim); font-size: 0.8rem; max-width: 110ch; }
+[data-live] > .nx-resposta + .nx-kpis { margin-top: 12px; }
+
+/* explicação recolhível ("Como é calculado?") */
+.nx-explica { border: 1px solid var(--line); border-radius: 12px; background: rgba(250, 237, 229, 0.015); }
+.nx-explica > summary { cursor: pointer; padding: 9px 14px; font-size: 0.84rem; color: var(--ink-dim); list-style: none; display: flex; align-items: center; gap: 8px; border-radius: 12px; }
+.nx-explica > summary::-webkit-details-marker { display: none; }
+.nx-explica > summary::before { content: "?"; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line-strong); display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--brand-soft); }
+.nx-explica > summary:hover { color: var(--ink); }
+.nx-explica > summary:focus-visible { outline: 2px solid var(--brand-bright); outline-offset: 1px; }
+.nx-explica[open] > summary { color: var(--ink); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
+.nx-explica-corpo { padding: 10px 14px 12px 40px; font-size: 0.84rem; color: var(--ink-dim); }
+.nx-explica-corpo p { margin: 0 0 6px; max-width: 110ch; }
+.nx-explica-corpo p:last-child { margin-bottom: 0; }
+
+/* tabelas por produto: 2026 em cima e 2027 embaixo na mesma célula */
+.nx-tab-par { min-width: 820px; }
+.nx-tab-par td { vertical-align: middle; }
+.nx-tab-par td.c-prod { min-width: 230px; }
+.nx-tab-par .nx-link-btn strong { font-weight: 500; }
+.nx-tab-par tr.is-total td.c-prod { font-weight: 600; }
+.nx-par { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 1px; font-variant-numeric: tabular-nums; }
+.nx-par > span { white-space: nowrap; }
+.nx-table .nx-par small { display: inline-block; min-width: 34px; margin-right: 6px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.04em; color: var(--ink-mute); text-align: left; }
+.nx-par > .is-26 { color: var(--ink-dim); }
+.nx-par > .is-27 { color: var(--brand-soft); }
+.nx-par.is-forte > span { font-weight: 600; }
+.nx-par.is-forte > .is-26 { color: var(--ink); }
+.nx-var { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 1px; white-space: nowrap; }
+.nx-var b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.nx-table .nx-var small { display: block; color: var(--ink-mute); font-size: 0.72rem; }
+.nx-var.is-ruim b { color: var(--warn); }
+.nx-var.is-bom b { color: var(--ok); }
+.nx-cobrar-cel { color: var(--brand-soft); }
+
+/* operação completa na formação do preço: aviso no lugar da fórmula */
+.nx-soma-op { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(250, 237, 229, 0.02); font-size: 0.84rem; color: var(--ink-dim); }
+.nx-dre thead th:first-child { white-space: normal; }
+.nx-dre td small.nx-inline { display: inline; color: var(--ink-mute); font-size: 0.74rem; margin-left: 4px; }
+
+/* ---------- importação de planilha ---------- */
+.nx-import { border-color: rgba(247, 81, 31, 0.45); box-shadow: 0 0 0 1px rgba(255, 114, 40, 0.08), var(--glow-sm); }
+.nx-import .nx-kpis { margin-bottom: 14px; }
+.nx-import-msgs { margin-top: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-input); }
+.nx-import-msgs h4 { margin: 0 0 6px; font-size: 0.9rem; }
+.nx-import-msgs.is-erro { border-color: rgba(255, 107, 91, 0.35); }
+.nx-import-msgs.is-erro h4 { color: var(--danger); }
+.nx-import-msgs.is-alerta h4 { color: var(--warn); }
+.nx-import-msgs ul { margin: 0; padding-left: 18px; max-height: 280px; overflow: auto; font-size: 0.82rem; color: var(--ink-dim); }
+.nx-import-msgs li { margin: 3px 0; }
+.nx-import-msgs li b { color: var(--ink); }
+
+/* ---------- dados da Receita Federal (CNPJá) ---------- */
+.nx-orig.is-receita { background: rgba(87, 201, 138, 0.14); color: var(--ok); }
+.nx-receita-dl { margin: 0 0 6px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 18px; }
+.nx-receita-dl > div { min-width: 0; padding: 10px 12px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--line); }
+.nx-receita-dl dt { font-size: 0.72rem; color: var(--ink-mute); margin-bottom: 3px; }
+.nx-receita-dl dd { margin: 0; font-size: 0.86rem; overflow-wrap: anywhere; }
+
+/* ---------- detalhamento (mais / menos detalhes) ---------- */
+.nx-det-cell { display: flex; align-items: flex-start; gap: 8px; }
+.nx-det-nome { min-width: 0; flex: 1; }
+.nx-det-btn { flex: none; width: 22px; height: 22px; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line-strong); border-radius: 6px; background: transparent; color: var(--ink-mute); cursor: pointer; padding: 0; transition: color .15s, border-color .15s, background .15s; }
+.nx-det-btn svg { width: 14px; height: 14px; transition: transform .15s; }
+.nx-det-btn:hover { color: var(--brand-soft); border-color: var(--brand-bright); }
+.nx-det-btn[aria-expanded="true"] { color: var(--brand-bright); border-color: rgba(247, 81, 31, 0.55); background: var(--brand-wash); }
+.nx-det-btn[aria-expanded="true"] svg { transform: rotate(90deg); }
+.nx-det-espaco { flex: none; width: 22px; }
+.nx-det-row > td { background: rgba(250, 237, 229, 0.025); padding: 8px 12px 12px 42px !important; border-top: 0; }
+.nx-det-dl { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 4px 14px; margin: 0; font-size: 0.8rem; }
+.nx-det-dl dt { color: var(--ink-mute); }
+.nx-det-dl dd { margin: 0; color: var(--ink-dim); overflow-wrap: anywhere; }
+.nx-det-bloco { margin-top: 10px; }
+.nx-det-cab { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--ink-dim); }
+@media (max-width: 560px) { .nx-det-dl { grid-template-columns: 1fr; } .nx-det-row > td { padding-left: 12px !important; } }
+/* ---------- quanto devo cobrar em 2027 ---------- */
+.nx-cobrar-card { border-color: rgba(247, 81, 31, 0.45); box-shadow: 0 0 0 1px rgba(255, 114, 40, 0.08), var(--glow-sm); }
+.nx-cobrar { display: grid; grid-template-columns: minmax(240px, 0.9fr) 1.1fr; gap: 16px; align-items: stretch; }
+.nx-cobrar-hero { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 18px 20px; border-radius: 16px; background: linear-gradient(135deg, rgba(247, 81, 31, 0.18), rgba(255, 162, 102, 0.06)); border: 1px solid rgba(247, 81, 31, 0.45); }
+.nx-cobrar-hero small { color: var(--ink-dim); font-size: 0.8rem; }
+.nx-cobrar-hero b { font-family: var(--font-display); font-size: clamp(1.7rem, 3vw, 2.3rem); color: var(--brand-soft); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.nx-cobrar-var { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-dim); }
+.nx-cobrar-var.is-sobe { color: var(--warn); }
+.nx-cobrar-var.is-desce { color: var(--ok); }
+.nx-cobrar-dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.nx-cobrar-dl > div { padding: 10px 12px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--line); min-width: 0; }
+.nx-cobrar-dl dt { font-size: 0.72rem; color: var(--ink-mute); }
+.nx-cobrar-dl dd { margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+.nx-cobrar-dl dd small { color: var(--ink-mute); }
+.nx-cobrar-card .nx-det-cab { margin-top: 10px; }
+.nx-cobrar-lista { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 0.84rem; }
+.nx-cobrar-lista li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 8px; background: rgba(250, 237, 229, 0.03); }
+.nx-cobrar-lista li b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nx-th-dica { display: block; font-family: var(--font-body); font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-mute); font-size: 0.7rem; }
+@media (max-width: 760px) { .nx-cobrar { grid-template-columns: 1fr; } }
+/* resultado oculto até "Mostrar resultado": área desfocada sugere a resposta guardada */
+.nx-cobrar-card.is-oculto { border-style: dashed; box-shadow: none; }
+.nx-cobrar-oculto { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; border-radius: 16px; border: 1px solid rgba(247, 81, 31, 0.25); background: linear-gradient(135deg, rgba(247, 81, 31, 0.10), rgba(255, 162, 102, 0.03)); overflow: hidden; }
+.nx-cobrar-ph { display: block; height: 30px; width: 46%; border-radius: 10px; background: linear-gradient(90deg, rgba(255, 162, 102, 0.55), rgba(247, 81, 31, 0.25)); filter: blur(7px); }
+.nx-cobrar-ph.is-medio { height: 14px; width: 62%; opacity: 0.6; filter: blur(5px); }
+.nx-cobrar-ph.is-curto { height: 14px; width: 34%; opacity: 0.45; filter: blur(5px); }
+@media print { .nx-cobrar-card.is-oculto { display: none; } }
+
+@media print { .nx-det-row[hidden] { display: table-row !important; } .nx-det-btn { display: none; } }
+
+/* ---------- relatório: escolha do modelo e relatório simplificado ---------- */
+.nx-report-bar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 18px; margin-bottom: 18px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-card); }
+.nx-report-bar > .nx-field { flex: 1 1 460px; margin: 0; }
+.nx-report-bar .nx-report-actions { margin: 0; }
+.nx-simp-sub { margin: 4px 0 0; color: var(--ink-dim); font-size: 0.9rem; }
+.nx-simp-boxes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 6px; }
+.nx-simp-box { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line-strong); background: var(--bg-input); }
+.nx-simp-box span { font-size: 0.8rem; color: var(--ink-dim); font-weight: 600; }
+.nx-simp-box b { font-family: var(--font-display); font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.nx-simp-box small { color: var(--ink-mute); font-size: 0.78rem; }
+.nx-simp-box.is-destaque { background: linear-gradient(135deg, rgba(247, 81, 31, 0.22), rgba(255, 162, 102, 0.08)); border-color: rgba(247, 81, 31, 0.6); box-shadow: var(--glow-sm); }
+.nx-simp-box.is-destaque b { color: var(--brand-soft); }
+.nx-simp-lista { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; line-height: 1.5; }
+.nx-simp-lista li::marker { color: var(--brand-bright); }
+.nx-simp-tab td.nx-simp-exp { color: var(--ink-mute); font-size: 0.82rem; }
+.nx-simp-tab tr.is-lucro td { color: var(--c26); }
+@media (max-width: 760px) { .nx-simp-boxes { grid-template-columns: 1fr; } }
+@media print {
+  .nx-report-bar { display: none !important; }
+  .nx-simp-box { border-color: #ddd; background: #fff; }
+  .nx-simp-box.is-destaque { background: #fdeee6; }
+}
+
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  :root { --ink: #1f1d1b; --ink-dim: #3d3833; --ink-mute: #6b625b; --line: #e3dcd6; --line-strong: #d4cbc4; --bg-card: #fff; --brand-soft: #c2410c; }
+  body { background: #fff; color: #1f1d1b; font-size: 10.5pt; }
+  body::before, .nx-side, .nx-top, .nx-context, .nx-footer, .no-print, .nx-toasts, .nx-tooltip, .nx-menu-btn { display: none !important; }
+  .nx-main { margin: 0; }
+  .nx-content { padding: 0; }
+  .nx-report-head, .nx-report-sec { border: 1px solid #e3dcd6; box-shadow: none; break-inside: avoid-page; background: #fff; }
+  .nx-report-head { background: #131211; color: #faede5; border-top: 4px solid #f7511f; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .nx-report-head dt { color: #c9bcb2; }
+  .nx-report-head dd { color: #faede5; }
+  .nx-table-wrap { overflow: visible; border-color: #e3dcd6; }
+  .nx-memo { min-width: 0; font-size: 7pt; }
+  .nx-table thead th { color: #fff; background: #f7511f; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .nx-table tr.is-total td { background: #fdece3; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .nx-table tr.nx-group th { color: #c2410c; }
+  .nx-origem, .nx-badge { border: 1px solid #d4cbc4; background: none !important; color: #3d3833 !important; }
+  a { color: #c2410c; }
+}
+
+/* ---------- operação com vários produtos ---------- */
+.nx-op-card .nx-card-head h2 { font-size: 1.25rem; }
+.nx-prod-table td { vertical-align: middle; }
+.nx-prod-table .c-n { width: 32px; color: var(--ink-mute); font-family: var(--font-mono); }
+.nx-prod-table .c-acoes { min-width: 200px; }
+.nx-prod-table .nx-count { white-space: nowrap; }
+.nx-prod-table .c-acoes .nx-btn, .nx-prod-table .c-acoes .nx-chip { margin: 2px 4px 2px 0; }
+.nx-table tr.is-ativo td { background: rgba(247, 81, 31, 0.08); }
+.nx-table tr.is-ativo td:first-child { box-shadow: inset 3px 0 0 var(--brand-bright); }
+.nx-table b.is-27, .nx-table .is-27 { color: var(--brand-soft); }
+.nx-arrow { color: var(--ink-mute); margin: 0 2px; }
+.nx-chip.is-on { display: inline-block; border-color: rgba(247, 81, 31, 0.6); color: var(--brand-soft); background: var(--brand-wash); }
+.nx-prod-vazio { border: 1px dashed var(--line-strong); border-radius: 14px; padding: 22px; text-align: center; background: rgba(250, 237, 229, 0.015); }
+.nx-prod-vazio strong { display: block; font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 6px; }
+.nx-prod-vazio p { margin: 0 auto; max-width: 62ch; color: var(--ink-dim); font-size: 0.86rem; }
+.nx-prod-form { display: flex; flex-direction: column; gap: 18px; padding-left: 14px; border-left: 2px solid rgba(247, 81, 31, 0.35); scroll-margin-top: 16px; }
+.nx-prod-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; padding: 16px 18px; border-radius: var(--radius); border: 1px solid rgba(247, 81, 31, 0.45); background: linear-gradient(150deg, rgba(247, 81, 31, 0.14), rgba(28, 26, 24, 0.95) 55%); box-shadow: 0 0 36px -16px rgba(255, 114, 40, 0.55); scroll-margin-top: 16px; }
+.nx-prod-head h2 { font-size: 1.2rem; margin-top: 2px; }
+.nx-prod-head p { margin: 6px 0 0; color: var(--ink-dim); font-size: 0.84rem; max-width: 70ch; }
+.nx-static.is-calc { border-style: solid; border-color: rgba(247, 81, 31, 0.4); background: var(--brand-wash); color: var(--brand-soft); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.nx-prod-seletor { display: flex; flex-direction: column; gap: 6px; }
+.nx-chips-sel { display: flex; flex-wrap: wrap; gap: 6px; }
+.nx-chip-sel { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--bg-card); color: var(--ink-dim); font-size: 0.82rem; cursor: pointer; max-width: 100%; }
+.nx-chip-sel em { font-style: normal; font-family: var(--font-mono); font-size: 0.7rem; color: var(--brand-bright); }
+.nx-chip-sel:hover { border-color: var(--brand-bright); color: var(--ink); }
+.nx-chip-sel.is-on { border-color: rgba(247, 81, 31, 0.65); background: var(--brand-wash); color: var(--ink); box-shadow: var(--glow-sm); }
+.nx-side-sum h4 { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-soft); margin: 4px 0 2px; }
+.nx-side-op { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* ---------- empresas: ficha ---------- */
+.nx-emp { flex-wrap: wrap; padding: 8px 10px; }
+.nx-emp-main { cursor: default; padding: 2px 0; flex: 1 1 100%; }
+.nx-emp-acoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.nx-ficha-fechada { border-style: dashed; }
+.nx-ficha-rodape { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--bg-card); }
+.nx-ficha-rodape p { margin: 0; color: var(--ink-dim); font-size: 0.84rem; }
+@media (max-width: 560px) {
+  .nx-prod-form { padding-left: 8px; }
+}
+.nx-prod-table { min-width: 940px; }
+.nx-prod-table td.c-prod { min-width: 240px; }
+.nx-prod-table td.num { white-space: nowrap; }
+
+/* ---------- cadastro da operação: listas e troca de produto ---------- */
+.nx-link-btn { background: none; border: 0; padding: 0; margin: 0; color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
+.nx-link-btn strong { border-bottom: 1px dashed rgba(255, 162, 102, 0.55); }
+.nx-link-btn:hover strong { color: var(--brand-soft); border-bottom-style: solid; }
+.nx-link-btn + .nx-obs { display: block; }
+.nx-ops-table { min-width: 860px; }
+.nx-ops-table td { vertical-align: middle; }
+.nx-ops-table td:first-child { min-width: 240px; }
+.nx-prod-troca { flex: 1 1 100%; padding-top: 4px; border-top: 1px solid var(--line); }
+.nx-field .nx-help b { color: var(--brand-soft); }
+
+/* cartões 2026 × 2027 não alargam a página no celular: a tabela rola dentro do cartão */
+.nx-period { min-width: 0; }
+.nx-period .nx-th-dica { white-space: normal; }

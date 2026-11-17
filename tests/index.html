@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testes — RTC Comparativo</title>
+<style>
+  body { margin: 0; padding: 32px 16px; background: #131211; color: #faede5; font: 15px/1.6 "IBM Plex Sans", system-ui, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  p { color: #b8aaa0; margin: 0 0 1.25rem; }
+  #resumo { font-weight: 600; padding: .6rem .9rem; border-radius: 10px; display: inline-block; margin-bottom: 1rem; }
+  #resumo.ok { background: rgba(46, 160, 67, .18); color: #7ee2a0; }
+  #resumo.falha { background: rgba(247, 81, 31, .18); color: #ffa266; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { padding: .45rem .7rem; border-bottom: 1px solid rgba(250,237,229,.08); font-size: .92rem; }
+  li.ok { color: #d9cec6; }
+  li.falha { color: #ffa266; background: rgba(247, 81, 31, .08); }
+</style>
+</head>
+<body>
+<main>
+  <h1>RTC Comparativo — testes do motor de cálculo</h1>
+  <p>Cenários tributários de 2026 e 2027: Simples Nacional, Lucro Presumido, Lucro Real, ICMS-ST, créditos, CBS/IBS e markup.</p>
+  <div id="resumo">Executando…</div>
+  <ul id="resultado"></ul>
+</main>
+<script src="../src/core/format.js"></script>
+<script src="../src/core/store.js"></script>
+<script src="../src/core/xlsx.js"></script>
+<script src="../src/core/cnpja.js"></script>
+<script src="../src/core/auth.js"></script>
+<script src="../src/modules/rtc/legal.js"></script>
+<script src="../src/modules/rtc/params.js"></script>
+<script src="../src/modules/rtc/simples.js"></script>
+<script src="../src/modules/rtc/model.js"></script>
+<script src="../src/modules/rtc/rules.js"></script>
+<script src="../src/modules/rtc/engine.js"></script>
+<script src="../src/modules/rtc/consolidar.js"></script>
+<script src="../src/modules/rtc/planilha.js"></script>
+<script src="../src/modules/lucro/motor.js"></script>
+<script src="../src/modules/lucro/modelo.js"></script>
+<script src="../src/modules/lucro/importar.js"></script>
+<script src="../src/modules/lucro/relatorio.js"></script>
+<script src="../src/core/integracao.js"></script>
+<script src="runner.js"></script>
+<script src="engine.test.js"></script>
+<script src="lucro.test.js"></script>
+<script src="integracao.test.js"></script>
+<script src="lucro2027.test.js"></script>
+<script>T.run();</script>
+</body>
+</html>

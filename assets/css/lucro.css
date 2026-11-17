@@ -1,0 +1,201 @@
+/* ============================================================
+   Lucratividade por Item — estilos do módulo (usa os tokens de nexus.css)
+   Faixas de margem: verde = acima da meta · amarelo = abaixo da meta · vermelho = prejuízo
+   (sempre acompanhadas de texto: a cor nunca é a única pista)
+   ============================================================ */
+.lc-alerta { display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: rgba(242, 184, 75, 0.14); color: var(--warn); white-space: nowrap; margin: 1px 2px 1px 0; cursor: help; }
+.lc-alerta.is-margem-negativa, .lc-alerta.is-dae-codigo { background: rgba(255, 107, 91, 0.14); color: var(--danger); }
+.lc-alerta.is-tributacao-padrao { background: rgba(143, 184, 240, 0.14); color: var(--info); }
+.lc-dica { cursor: help; }
+.lc-dica-kpi { cursor: help; display: contents; }
+td.lc-dica { text-decoration: underline dotted rgba(250, 237, 229, 0.3); text-underline-offset: 4px; }
+.lc-pendente, .lc-pendente span, .lc-pendente b { color: var(--warn) !important; }
+
+/* ficha do item (compra) */
+.lc-ficha-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+.lc-ficha-res { position: sticky; top: 16px; padding: 14px 16px; border-radius: 14px; background: var(--bg-input); border: 1px solid var(--line); }
+.lc-ficha-res h4 { margin: 0 0 8px; font-size: 0.92rem; }
+.lc-lista-valores { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 0.86rem; }
+.lc-lista-valores li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px; border-radius: 8px; }
+.lc-lista-valores li.is-total { background: var(--brand-wash); font-weight: 600; }
+.lc-lista-valores b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* tela do item (venda) */
+.lc-trib { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.lc-trib-cab { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.lc-trib-cab h4 { margin: 0; font-size: 0.92rem; }
+.lc-lucro { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.lc-lucro > div { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--bg-input); }
+.lc-lucro small { color: var(--ink-mute); font-size: 0.76rem; }
+.lc-lucro b { font-family: var(--font-display); font-size: 1.65rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.lc-lucro span { font-size: 0.8rem; color: var(--ink-dim); }
+.lc-lucro.is-ok > div { border-color: rgba(87, 201, 138, 0.4); }
+.lc-lucro.is-abaixo > div { border-color: rgba(242, 184, 75, 0.45); }
+.lc-lucro.is-negativa > div { border-color: rgba(255, 107, 91, 0.5); }
+.lc-lucro.is-ok b { color: var(--ok); }
+.lc-lucro.is-abaixo b { color: var(--warn); }
+.lc-lucro.is-negativa b { color: var(--danger); }
+.lc-faixa-txt.is-ok { color: var(--ok); }
+.lc-faixa-txt.is-abaixo { color: var(--warn); }
+.lc-faixa-txt.is-negativa { color: var(--danger); }
+.lc-faixa-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lc-faixa-pill.is-ok { background: rgba(87, 201, 138, 0.14); color: var(--ok); }
+.lc-faixa-pill.is-abaixo { background: rgba(242, 184, 75, 0.15); color: var(--warn); }
+.lc-faixa-pill.is-negativa { background: rgba(255, 107, 91, 0.15); color: var(--danger); }
+/* DRE do item (Lei 6.404/1976, art. 187) */
+.lc-dre td { padding-top: 6px; padding-bottom: 6px; }
+.lc-dre td.num { white-space: nowrap; }
+.lc-dre tr[title] td:first-child { cursor: help; }
+.lc-dre tr.is-total td { font-weight: 700; border-top: 1px solid var(--line-strong); }
+.lc-dre tr.is-grupo td { font-weight: 600; color: var(--ink); }
+.lc-dre tr.is-sub td { color: var(--ink-dim); font-size: 0.84rem; }
+.lc-dre tr.is-sub td:first-child { padding-left: 26px; }
+.lc-dre tr.is-final td { font-weight: 700; font-size: 0.98rem; background: var(--brand-wash); border-top: 1px solid rgba(247, 81, 31, 0.4); }
+.lc-dre tr.is-final.is-ok td { color: var(--ok); }
+.lc-dre tr.is-final.is-abaixo td { color: var(--warn); }
+.lc-dre tr.is-final.is-negativa td { color: var(--danger); }
+.lc-dre .nx-obs { display: block; font-weight: 400; }
+
+/* tela Venda: resultado (DRE) e edição do preço lado a lado em tela larga */
+.lc-venda-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
+.lc-venda-res, .lc-venda-ed { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+@media (min-width: 1280px) {
+  .lc-venda-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+  .lc-venda-ed { grid-column: 1; grid-row: 1; }
+  /* fixa ao rolar; se não couber na altura da tela, rola por dentro */
+  .lc-venda-res { grid-column: 2; grid-row: 1; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+  .lc-venda-res .lc-lucro { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+}
+
+/* filtro do item: busca, situação, lista e anterior/próximo */
+.lc-filtro-grade { display: grid; grid-template-columns: minmax(240px, 1fr) auto; gap: 10px 16px; align-items: end; }
+.lc-filtro-res { display: contents; }
+.lc-filtro-busca { width: 100%; margin: 0; }
+.lc-filtro-faixas { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px; }
+.lc-filtro-sel, .lc-filtro-conta { grid-column: 1 / -1; }
+.lc-filtro-lista select { font-family: var(--font-display); font-size: 1rem; }
+.lc-ff { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink-dim); font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+.lc-ff::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-bright); }
+.lc-ff.is-negativa::before { background: var(--danger); }
+.lc-ff.is-abaixo::before { background: var(--warn); }
+.lc-ff.is-ok::before { background: var(--ok); }
+.lc-ff.is-sem::before { background: var(--ink-mute); }
+.lc-ff b { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 500; color: var(--ink-mute); }
+.lc-ff:hover:not(:disabled) { border-color: rgba(247, 81, 31, 0.5); color: var(--ink); }
+.lc-ff.is-on { border-color: rgba(247, 81, 31, 0.6); background: var(--brand-wash); color: var(--ink); }
+.lc-ff.is-on b { color: var(--brand-soft); }
+.lc-ff:disabled { opacity: 0.45; cursor: default; }
+.lc-filtro-sel { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.lc-filtro-lista { margin: 0; min-width: 0; }
+.lc-filtro-lista select { width: 100%; font-weight: 600; }
+.lc-filtro-nav { white-space: nowrap; }
+.lc-filtro-conta { margin: 0; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em; color: var(--ink-mute); }
+
+/* referências de preço e espaço de negociação */
+.lc-refs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
+.lc-refs > div { padding: 12px 14px; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--line); min-width: 0; }
+.lc-refs dt { font-size: 0.74rem; color: var(--ink-mute); }
+.lc-refs dd { margin: 2px 0; font-family: var(--font-display); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.lc-refs small { color: var(--ink-mute); font-size: 0.72rem; }
+.lc-trilha { position: relative; height: 26px; margin: 6px 8px 0; }
+.lc-trilha::before { content: ""; position: absolute; left: 0; right: 0; top: 11px; height: 4px; border-radius: 4px; background: rgba(250, 237, 229, 0.08); }
+.lc-trilha-faixa { position: absolute; top: 11px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--warn), var(--ok)); opacity: 0.75; }
+.lc-trilha-marca { position: absolute; top: 5px; width: 2px; height: 16px; background: var(--ink-mute); transform: translateX(-1px); }
+.lc-trilha-pv { position: absolute; top: 6px; width: 14px; height: 14px; border-radius: 50%; transform: translateX(-7px); border: 2px solid var(--bg-card); background: var(--brand-bright); box-shadow: var(--glow-sm); }
+.lc-trilha-pv.is-ok { background: var(--ok); }
+.lc-trilha-pv.is-abaixo { background: var(--warn); }
+.lc-trilha-pv.is-negativa { background: var(--danger); }
+
+/* tabela da planilha: preço editável na célula */
+.lc-tab-resultado td { vertical-align: middle; }
+.lc-celula-pv { min-width: 116px; }
+.lc-celula-pv .nx-input-wrap { min-width: 104px; }
+.lc-tab-resultado td:last-child { min-width: 116px; }
+.lc-tab-resultado td:last-child .lc-alerta { display: table; margin: 2px 0; }
+.lc-celula-pv .nx-input { padding: 6px 8px; font-size: 0.86rem; }
+.lc-celula-pv .nx-prefix { font-size: 0.74rem; }
+.nx-seg-opt.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.lc-venda-padrao .nx-card-body > .nx-btn { margin-top: 6px; }
+
+@media (max-width: 560px) {
+  .lc-filtro-sel { grid-template-columns: 1fr 1fr; }
+  .lc-filtro-lista { grid-column: 1 / -1; grid-row: 1; }
+  .lc-dre { font-size: 0.76rem; }
+  .lc-dre th, .lc-dre td { padding-left: 6px; padding-right: 6px; }
+  .lc-dre tr.is-sub td:first-child { padding-left: 14px; }
+  .lc-dre .nx-obs { display: none; }
+  .lc-dre tr.is-final td { font-size: inherit; }
+  /* no celular, por unidade e AV %; o total da linha está no cartão de lucro acima */
+  .lc-dre th:nth-child(3), .lc-dre td:nth-child(3) { display: none; }
+}
+@media (max-width: 980px) {
+  .lc-filtro-grade { grid-template-columns: minmax(0, 1fr); }
+  .lc-ficha-grid { grid-template-columns: 1fr; }
+  .lc-ficha-res { position: static; }
+  .lc-refs { grid-template-columns: 1fr; }
+}
+
+/* ---------- cenário da simulação (2026 × 2027) ---------- */
+/* seletor no painel "Etapas do módulo" do menu inicial */
+.nx-modpanel-extra { margin-top: 14px; }
+.lc-cenario-ini { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(247, 81, 31, 0.35); background: linear-gradient(120deg, rgba(247, 81, 31, 0.10), rgba(28, 26, 24, 0.4) 70%); }
+.lc-cenario-txt { flex: 1 1 260px; min-width: 0; }
+.lc-cenario-txt p { margin: 4px 0 0; font-size: 0.84rem; color: var(--ink-dim); max-width: 60ch; }
+.lc-cen-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.lc-cen-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--bg-input); color: var(--ink-dim); font: inherit; text-align: left; cursor: pointer; min-width: 200px; transition: border-color .15s, background .15s; }
+.lc-cen-opt b { font-size: 0.9rem; color: var(--ink); }
+.lc-cen-opt small { font-size: 0.74rem; color: var(--ink-mute); }
+.lc-cen-opt:hover { border-color: var(--brand-bright); }
+.lc-cen-opt:focus-visible { outline: 2px solid var(--brand-bright); outline-offset: 2px; }
+.lc-cen-opt.is-on { border-color: rgba(247, 81, 31, 0.7); background: var(--brand-wash); box-shadow: var(--glow-sm); }
+.lc-cen-opt.is-on b { color: var(--brand-soft); }
+.lc-cen-opt.is-on::after { content: "selecionado"; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-bright); margin-top: 2px; }
+
+/* cartão CBS e IBS (Parâmetros, cenário 2027) */
+.lc-card-2027 { border-color: rgba(247, 81, 31, 0.4); }
+.lc-27-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.lc-27-grid .nx-explica { margin-top: 12px; }
+.lc-27-premissas { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-input); }
+.lc-aliq27 { margin: 0 0 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.lc-aliq27 > div { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-input); min-width: 0; }
+.lc-aliq27 dt { font-size: 0.74rem; color: var(--ink-mute); }
+.lc-aliq27 dd { margin: 2px 0; font-family: var(--font-display); font-size: 1.4rem; color: var(--brand-soft); font-variant-numeric: tabular-nums; }
+.lc-aliq27 small { font-size: 0.72rem; color: var(--ink-mute); }
+.lc-status { display: inline-block; padding: 0 6px; border-radius: 5px; font-weight: 600; background: rgba(242, 184, 75, 0.15); color: var(--warn); }
+.lc-status.is-oficial { background: rgba(87, 201, 138, 0.14); color: var(--ok); }
+@media (max-width: 860px) { .lc-27-grid { grid-template-columns: 1fr; } }
+
+/* compra: linhas de detalhe no resumo do item */
+.lc-lista-valores li.lc-sub { padding-top: 0; padding-left: 18px; font-size: 0.78rem; color: var(--ink-mute); cursor: help; }
+
+/* venda: CBS e IBS cobrados do cliente à parte (2027) */
+.lc-fora { margin-top: 14px; }
+.lc-fora h4 { margin: 0 0 8px; font-size: 0.9rem; }
+.lc-fora h4 small { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-soft); margin-left: 6px; }
+.lc-dre-card .nx-explica { margin-top: 12px; }
+.lc-modo-nota { margin-top: 6px; }
+
+/* venda: barra do item em análise (sem cabeçalho) */
+.lc-filtro { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px; }
+.lc-filtro > .lc-filtro-grade { flex: 1 1 640px; min-width: 0; }
+.lc-filtro-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-self: flex-start; margin-top: 22px; }
+@media (max-width: 980px) { .lc-filtro-acoes { margin-top: 0; } }
+
+/* resultado: faixa de preço (mínimo e meta) numa célula */
+.lc-faixa-preco { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 1px; white-space: nowrap; font-size: 0.8rem; }
+.lc-faixa-preco span:first-child { color: var(--ink-mute); }
+.lc-tab-resultado td:first-child { min-width: 190px; }
+/* compra: tabela cabe na tela também com a linha de CBS e IBS (2027) */
+.lc-tab-compra th, .lc-tab-compra td { padding-left: 8px; padding-right: 8px; }
+.lc-tab-compra .c-acoes .nx-btn.sm { padding: 4px 9px; font-size: 0.74rem; }
+
+/* modo 4 da venda: preço de hoje − PIS e Cofins embutidos = preço sem PIS e Cofins (lista curta: rótulo à esquerda, valor à direita) */
+.lc-descont { margin: 2px 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-input); overflow: hidden; }
+.lc-descont > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 12px; padding: 8px 12px; }
+.lc-descont > div + div { border-top: 1px solid var(--line); }
+.lc-descont dt { font-size: 0.84rem; color: var(--ink-dim); }
+.lc-descont dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lc-descont small { grid-column: 1 / -1; font-size: 0.72rem; color: var(--ink-mute); }
+.lc-descont > .is-total { background: var(--brand-wash); }
+.lc-descont > .is-total dt, .lc-descont > .is-total dd { color: var(--ink); font-weight: 700; }
+.lc-descont-nota { margin: 2px 0 12px; }

@@ -1,0 +1,11 @@
+Pasta de configuração do site — Plataforma Nexus
+
+firebase-config.js
+  Identificação PÚBLICA do projeto Firebase (nexus-rtc). Não é segredo: a segurança
+  dos dados vem do login e das regras do Firestore (firestore.rules, na raiz do projeto).
+  Restrinja a chave de API aos domínios do site (veja docs/FIREBASE.md, item 3.5).
+  NUNCA coloque aqui chave de conta de serviço, senha ou token de administrador.
+
+Os acessos (usuários, módulos liberados e bloqueios) ficam no Firebase e são
+gerenciados na plataforma, em Usuários. O arquivo acessos.js do modelo antigo
+não é mais usado e pode ser apagado do servidor, se existir.

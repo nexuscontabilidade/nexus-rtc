@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plataforma Nexus Contabilidade</title>
+<meta name="description" content="Plataforma Nexus Contabilidade — RTC Comparativo: simulador de formação de preço de venda comparando 2026 e janeiro de 2027 (PIS/Cofins → CBS).">
+<meta name="theme-color" content="#131211">
+<link rel="icon" type="image/png" href="assets/img/logo-nexus-web.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/nexus.css">
+<link rel="stylesheet" href="assets/css/plataforma.css">
+<link rel="stylesheet" href="assets/css/rtc.css">
+<link rel="stylesheet" href="assets/css/lucro.css">
+</head>
+<body>
+<div id="app">
+  <noscript><p style="padding:24px">Ative o JavaScript para usar a plataforma Nexus.</p></noscript>
+</div>
+
+<!-- Núcleo da plataforma -->
+<!-- Configuração pública do Firebase (projeto nexus-rtc) -->
+<script src="config/firebase-config.js"></script>
+<script src="src/core/format.js"></script>
+<script src="src/core/sync.js"></script>
+<script src="src/core/store.js"></script>
+<script src="src/core/dom.js"></script>
+<script src="src/core/charts.js"></script>
+<script src="src/core/xlsx.js"></script>
+<script src="src/core/cnpja.js"></script>
+<script src="src/core/logo-data.js"></script>
+<script src="src/core/nuvem.js"></script>
+<script src="src/core/auth.js"></script>
+<script src="src/core/shell.js"></script>
+<script src="src/core/usuarios.js"></script>
+
+<!-- Módulo RTC Comparativo -->
+<script src="src/modules/rtc/legal.js"></script>
+<script src="src/modules/rtc/params.js"></script>
+<script src="src/modules/rtc/simples.js"></script>
+<script src="src/modules/rtc/model.js"></script>
+<script src="src/modules/rtc/rules.js"></script>
+<script src="src/modules/rtc/engine.js"></script>
+<script src="src/modules/rtc/consolidar.js"></script>
+<script src="src/modules/rtc/planilha.js"></script>
+<script src="src/modules/rtc/ui.js"></script>
+<script src="src/modules/rtc/export.js"></script>
+<script src="src/modules/rtc/views/empresas.js"></script>
+<script src="src/modules/rtc/views/operacao.js"></script>
+<script src="src/modules/rtc/views/custo.js"></script>
+<script src="src/modules/rtc/views/preco.js"></script>
+<script src="src/modules/rtc/views/comparativo.js"></script>
+<script src="src/modules/rtc/views/relatorio.js"></script>
+<script src="src/modules/rtc/views/parametros.js"></script>
+<script src="src/modules/rtc/app.js"></script>
+
+<!-- Módulo Lucratividade por Item (usa os componentes de interface do RTC) -->
+<script src="src/modules/lucro/motor.js"></script>
+<script src="src/modules/lucro/modelo.js"></script>
+<script src="src/modules/lucro/importar.js"></script>
+<script src="src/modules/lucro/relatorio.js"></script>
+<script src="src/modules/lucro/app.js"></script>
+<script src="src/modules/lucro/views/empresas.js"></script>
+<script src="src/modules/lucro/views/parametros.js"></script>
+<script src="src/modules/lucro/views/compra.js"></script>
+<script src="src/modules/lucro/views/venda.js"></script>
+<script src="src/modules/lucro/views/resultado.js"></script>
+<script src="src/modules/lucro/views/relatorio.js"></script>
+
+<!-- Integração entre os módulos (produtos copiados de um para o outro) -->
+<script src="src/core/integracao.js"></script>
+
+<script>Nexus.shell.iniciar();</script>
+</body>
+</html>

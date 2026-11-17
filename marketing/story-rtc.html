@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=540">
+<title>Story — RTC Comparativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/nexus.css">
+<link rel="stylesheet" href="../assets/css/rtc.css">
+<style>
+  /* Arte para Stories: 540 × 960 CSS px, capturada com fator 2 → 1080 × 1920 px */
+  html, body { margin: 0; width: 540px; height: 960px; overflow: hidden; background: #0e0d0c; }
+  body::before { display: none; }
+  .story {
+    position: relative; width: 540px; height: 960px; overflow: hidden;
+    background:
+      radial-gradient(560px 460px at 105% -5%, rgba(247, 81, 31, 0.34), transparent 62%),
+      radial-gradient(520px 420px at -10% 92%, rgba(255, 114, 40, 0.20), transparent 60%),
+      linear-gradient(180deg, #121110 0%, #0d0c0b 100%);
+    font-family: var(--font-body); color: var(--ink);
+  }
+  .story::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(250, 237, 229, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(250, 237, 229, 0.035) 1px, transparent 1px);
+    background-size: 36px 36px;
+    -webkit-mask-image: radial-gradient(520px 560px at 50% 52%, #000 30%, transparent 75%);
+            mask-image: radial-gradient(520px 560px at 50% 52%, #000 30%, transparent 75%);
+  }
+  /* Área segura dos Stories: conteúdo entre ~250 px e ~1670 px (125–835 CSS px) */
+  .s-top { position: absolute; top: 118px; left: 34px; right: 34px; display: flex; align-items: center; }
+  .s-logo { width: 112px; aspect-ratio: 760 / 272; background: url("../assets/img/logo-nexus-web.png") no-repeat left center / contain; filter: drop-shadow(0 0 16px rgba(255, 114, 40, 0.4)); }
+  .s-copy { position: absolute; top: 176px; left: 34px; right: 34px; }
+  .s-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brand-bright); }
+  .s-copy h1 { font-family: var(--font-display); font-size: 36px; line-height: 1.03; letter-spacing: -0.02em; margin: 9px 0 10px; }
+  .s-copy h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 18px rgba(255, 114, 40, 0.35)); }
+  .s-copy p { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-dim); max-width: 440px; }
+
+  .s-visual { position: absolute; top: 340px; left: 0; right: 0; height: 350px; }
+  .phone {
+    position: absolute; left: 52px; top: 4px; width: 178px; height: 342px;
+    border-radius: 30px; background: #090807; padding: 8px; transform: rotate(-5deg);
+    box-shadow: 0 0 0 1.5px rgba(250, 237, 229, 0.18), 0 0 0 5px #1d1a18, 0 30px 60px rgba(0, 0, 0, 0.65), 0 0 70px rgba(255, 114, 40, 0.30);
+  }
+  .phone::before { content: ""; position: absolute; top: 13px; left: 50%; width: 54px; height: 14px; margin-left: -27px; border-radius: 9px; background: #090807; z-index: 3; }
+  .screen { position: relative; width: 162px; height: 326px; border-radius: 23px; overflow: hidden; background: #131211; }
+  .screen iframe { border: 0; width: 375px; height: 755px; transform: scale(0.432); transform-origin: 0 0; pointer-events: none; }
+
+  .float { position: absolute; z-index: 5; background: #1c1a18; border: 1px solid rgba(250, 237, 229, 0.14); border-radius: 16px; padding: 13px 15px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.65); }
+  .f-label { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); white-space: nowrap; }
+  .f1 { right: 30px; top: 0; width: 236px; transform: rotate(2deg); border-color: rgba(247, 81, 31, 0.6); background: linear-gradient(160deg, #3b1c0f 0%, #1c1a18 62%); box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 36px rgba(255, 114, 40, 0.30); }
+  .f1 .big { display: block; font-size: 38px; font-weight: 600; letter-spacing: -0.02em; margin: 2px 0 2px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .f1 .row { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-dim); margin-top: 5px; }
+  .f1 .row b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .f1 .row b.is-27 { color: var(--brand-soft); }
+  .f2 { right: 18px; top: 178px; width: 262px; transform: rotate(-1.5deg); }
+  .f2 .chart-scale { width: 300px; transform: scale(0.773); transform-origin: 0 0; height: 108px; margin-top: 8px; }
+  .f2 .nx-legend { font-size: 9.5px; gap: 4px 10px; margin-bottom: 6px; }
+  .f2 .nx-axis { display: none; }
+
+  .s-chips { position: absolute; top: 698px; left: 34px; right: 34px; display: flex; flex-wrap: nowrap; gap: 7px; }
+  .s-chips span { font-size: 10.5px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-dim); background: #1a1816; white-space: nowrap; }
+  .s-chips span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--brand-bright); box-shadow: 0 0 8px rgba(255, 114, 40, 0.8); margin-right: 7px; vertical-align: 1px; }
+  .s-cta { position: absolute; top: 738px; left: 34px; right: 34px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; border-radius: 18px; background: var(--grad); color: #1b0d06; box-shadow: 0 0 44px rgba(255, 114, 40, 0.45); }
+  .s-cta strong { font-family: var(--font-display); font-size: 18px; line-height: 1.1; }
+  .s-cta span { text-align: right; font-size: 10.5px; font-weight: 600; line-height: 1.3; }
+  .s-cta span b { display: block; font-size: 14.5px; }
+  .s-foot { position: absolute; top: 814px; left: 34px; right: 34px; margin: 0; font-size: 8.5px; line-height: 1.4; color: #85796f; }
+</style>
+</head>
+<body>
+<div class="story" id="story">
+  <div class="s-top"><span class="s-logo" role="img" aria-label="Nexus Contabilidade"></span></div>
+
+  <div class="s-copy">
+    <span class="s-eyebrow">Novo · RTC Comparativo · 2026 × 2027</span>
+    <h1>Quanto a CBS muda o seu <em>preço de venda?</em></h1>
+    <p>Simule custo, créditos, tributos e margem de cada mercadoria — 2026 lado a lado com janeiro de 2027.</p>
+  </div>
+
+  <div class="s-visual">
+    <div class="phone"><div class="screen"><iframe id="app" title="RTC Comparativo" scrolling="no"></iframe></div></div>
+
+    <div class="float f1">
+      <span class="f-label">Mesma margem · total ao cliente</span>
+      <span class="big" id="f1-var">—</span>
+      <div class="row"><span>2026</span><b id="f1-26">—</b></div>
+      <div class="row"><span>Jan/2027</span><b class="is-27" id="f1-27">—</b></div>
+    </div>
+
+    <div class="float f2">
+      <span class="f-label">Composição do preço</span>
+      <div class="chart-scale"><div id="f2-chart"></div></div>
+    </div>
+
+  </div>
+
+  <div class="s-chips"><span>Simples, Presumido e Real</span><span>Memória com base legal</span><span>PDF e Excel</span></div>
+
+  <div class="s-cta"><strong>Simule com<br>a Nexus</strong><span>Fale no WhatsApp<b>(85) 99437-8137</b></span></div>
+
+  <p class="s-foot">Imagem do sistema com valores ilustrativos de exemplo. Os resultados dependem dos dados e parâmetros de cada empresa; a alíquota da CBS 2027 ainda depende de Resolução do Senado.</p>
+</div>
+
+<script src="../src/core/format.js"></script>
+<script src="../src/core/store.js"></script>
+<script src="../src/core/charts.js"></script>
+<script src="../src/modules/rtc/legal.js"></script>
+<script src="../src/modules/rtc/params.js"></script>
+<script src="../src/modules/rtc/simples.js"></script>
+<script src="../src/modules/rtc/model.js"></script>
+<script src="../src/modules/rtc/rules.js"></script>
+<script src="../src/modules/rtc/engine.js"></script>
+<script src="../src/modules/rtc/consolidar.js"></script>
+<script>
+(function () {
+  var F = Nexus.fmt;
+  // Dados: exemplo ilustrativo do próprio sistema (mesmo motor de cálculo do app)
+  var ex = Nexus.rtc.model.exemplo();
+  ex.empresa.razaoSocial = 'Empresa Exemplo Ltda';
+  ex.simulacao.nome = 'Revenda de mercadoria';
+  ex.simulacao.itens = [ex.simulacao.itens[0]]; // a arte usa um único produto do exemplo
+  var r = Nexus.rtc.engine.calcular(ex.empresa, ex.simulacao.itens[0], { semSensibilidade: false });
+  var c = r.comparativo.a1;
+  document.getElementById('f1-var').textContent = F.signedPct(c.total.d.pct);
+  document.getElementById('f1-26').textContent = F.brl(c.total.v26);
+  document.getElementById('f1-27').textContent = F.brl(c.total.v27);
+
+  function barra(rot, v) {
+    return { rotulo: rot, total: v.total, base: v.X, segmentos: [
+      { nome: 'Custo', valor: v.C }, { nome: 'Tributos', valor: v.tributosDentro },
+      { nome: 'Despesas', valor: v.despesas }, { nome: 'Margem', valor: Math.max(0, v.margemContrib) },
+      { nome: 'CBS/IBS', valor: v.tributosFora }] };
+  }
+  Nexus.charts.composicao(document.getElementById('f2-chart'), { barras: [barra('2026', r.a1.v26), barra('2027', r.a1.v27)] });
+
+  // Tela real do app no celular: grava o exemplo no armazenamento local e abre o Comparativo
+  localStorage.setItem('nexus.rtc.v1', JSON.stringify({
+    versao: 1, empresas: [ex.empresa], simulacoes: [ex.simulacao], parametros: {}, paramsAtualizadoEm: null,
+    aliquotasUF: {}, regras: [],
+    ui: { empresaId: ex.empresa.id, simulacaoId: ex.simulacao.id, empresaEditando: null, analise: '1', regraSelecionada: '', abaParametros: 'aliquotas' }
+  }));
+  var app = document.getElementById('app');
+  app.addEventListener('load', function () {
+    setTimeout(function () {
+      var doc = app.contentDocument;
+      var alvo = doc.querySelector('.nx-kpis');
+      if (alvo) app.contentWindow.scrollTo(0, alvo.getBoundingClientRect().top + app.contentWindow.scrollY - 40);
+      document.fonts.ready.then(function () { document.title = 'pronto'; });
+    }, 600);
+  });
+  app.src = '../index.html#/rtc/comparativo';
+})();
+</script>
+</body>
+</html>

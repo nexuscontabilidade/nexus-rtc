@@ -73,6 +73,7 @@
    * a descrição (op[2]) vai para a dica do mouse, e `dica` acrescenta o "?" ao lado do rótulo.
    */
   var segSeq = 0;
+  var CADEADO = '<svg class="nx-cadeado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   function segmento(o) {
     var nome = 'seg' + (++segSeq) + '_' + String(o.path).replace(/\W/g, '');
     var c = !!o.compacto;
@@ -81,8 +82,12 @@
       '<div class="nx-seg' + (c ? ' is-compact' : '') + '" role="radiogroup"' + (o.rotulo ? ' aria-label="' + esc(o.rotulo) + '"' : '') + '>' +
       o.opcoes.map(function (op) {
         var marcado = String(op[0]) === String(o.valor);
-        return '<label class="nx-seg-opt' + (marcado ? ' is-on' : '') + '"' + (c && op[2] ? ' title="' + esc(op[2]) + '"' : '') + '><input type="radio" name="' + nome + '" value="' + esc(op[0]) + '"' + dataAttrs(o) + (o.cast ? ' data-cast="' + o.cast + '"' : '') + (marcado ? ' checked' : '') + '>' +
-          '<span><strong>' + esc(op[1]) + '</strong>' + (op[2] && !c ? '<small>' + esc(op[2]) + '</small>' : '') + '</span></label>';
+        // op[3] (opcional): { bloqueado, titulo, acao } — opção em cinza, com cadeado; o clique dispara a ação (ex.: aviso)
+        var x = op[3] || {};
+        var titulo = x.bloqueado && x.titulo ? x.titulo : (c && op[2] ? op[2] : '');
+        return '<label class="nx-seg-opt' + (marcado ? ' is-on' : '') + (x.bloqueado ? ' is-disabled is-bloqueado' : '') + '"' + (titulo ? ' title="' + esc(titulo) + '"' : '') + (x.bloqueado && x.acao ? ' data-acao="' + esc(x.acao) + '"' : '') + '>' +
+          '<input type="radio" name="' + nome + '" value="' + esc(op[0]) + '"' + dataAttrs(o) + (o.cast ? ' data-cast="' + o.cast + '"' : '') + (marcado ? ' checked' : '') + (x.bloqueado ? ' disabled' : '') + '>' +
+          '<span><strong>' + (x.bloqueado ? CADEADO : '') + esc(op[1]) + '</strong>' + (op[2] && !c ? '<small>' + esc(x.bloqueado && x.titulo ? x.titulo : op[2]) + '</small>' : '') + '</span></label>';
       }).join('') +
       '</div>' + (o.ajuda ? '<span class="nx-help">' + o.ajuda + '</span>' : '') + '</div>';
   }

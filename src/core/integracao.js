@@ -41,11 +41,15 @@
 
   // ------------------------------------------------------------------ produtos
   /** Item da Lucratividade → produto do RTC (compra, tributação de venda e venda) */
-  function lucroParaRtc(x, emp, empLucro) {
+  function lucroParaRtc(x, emp, empLucro, x27, empLucro27) {
     var RTC = N.rtc, it = RTC.model.novoItem(emp);
     var c = x.compra || {}, v = x.venda || {};
     var LC = N.lucro;
     var p = N.store.merge(LC.motor.parametrosPadrao(), (empLucro && empLucro.params) || {});
+    // cenário 2027 da Lucratividade (tratamento de CBS e IBS, nota de 2027 e premissas); sem ele, os mesmos valores
+    x27 = x27 || x;
+    var c27 = x27.compra || {};
+    var p27 = N.store.merge(LC.motor.parametrosPadrao(), ((empLucro27 || empLucro) && (empLucro27 || empLucro).params) || {});
     var t = x.trib || LC.motor.tributacaoPadrao(x, p);
     var q = num(x.quantidade);
     it.produto.codigo = x.codigo || '';
@@ -64,9 +68,22 @@
     if (dae > 0 && (c.daeCodigo === '1023' || c.daeCodigo === '1031')) {
       it.perfil.antecipado = { tipo: c.daeCodigo === '1031' ? 'st' : 'antecipado', modo: 'informado', valor: dae, mva: null, ajustarMva: true };
     }
+    // fornecedor do Simples: no RTC, regime do fornecedor e % de crédito de ICMS (o valor informado na Lucratividade é o crédito)
+    if (c.fornecedorSimples) {
+      var vopSn = num(c.valorMercadoria) - num(c.descontoCompra) + (num(c.icmsFrete) > 0 ? 0 : num(c.frete)) + num(c.seguroOutros);
+      it.fornecedor.regime26 = 'simples'; it.fornecedor.regime27 = 'simples';
+      if (vopSn > 0) {
+        it.fornecedor.icmsSimplesPct = r6(num(c.icmsDestacado) / vopSn * 100);
+        if (informado(c27.cbsDestacada)) it.fornecedor.cbsSimplesPct = r6(num(c27.cbsDestacada) / vopSn * 100);
+        if (informado(c27.ibsDestacado)) it.fornecedor.ibsSimplesPct = r6(num(c27.ibsDestacado) / vopSn * 100);
+      }
+    }
+    // premissas de 2027 da empresa na Lucratividade (CBS e IBS na base do ICMS; liminar da CBS)
+    it.premissas.ibsCbsNaBaseIcms2027 = p27.ibsCbsNaBaseIcms !== false;
+    it.premissas.liminarCbsForaBaseIcms2027 = !!p27.liminarCbsForaBaseIcms;
     it.perfil.pisCofins.tratamento = PC_LUCRO_RTC[(t && t.regimePisCofins) || c.regimePisCofins] || 'normal';
     // CBS e IBS (2027): o mesmo tratamento do item nos dois módulos
-    var cb = x.cbsIbs || {};
+    var cb = x27.cbsIbs || {};
     if (cb.regime === 'REDUCAO' && num(cb.reducao) > 0) { it.perfil.cbsIbs.tratamento = 'reducao'; it.perfil.cbsIbs.reducaoPct = num(cb.reducao); }
     else if (cb.regime === 'ALIQ_ZERO') it.perfil.cbsIbs.tratamento = 'aliquota_zero';
     else if (cb.regime === 'ISENTO') it.perfil.cbsIbs.tratamento = 'isento';
@@ -119,6 +136,12 @@
     if (tipoAnt === 'antecipado' && antec > 0) { c.daeValor = r2(antec); c.daeCodigo = '1023'; }
     else if ((tipoAnt === 'st' && antec > 0) || stRetido > 0) { c.daeValor = r2(antec + stRetido); c.daeCodigo = '1031'; }
     c.regimePisCofins = PC_RTC_LUCRO[pf.pisCofins.tratamento] || 'NORMAL';
+    // fornecedor do Simples: o crédito de ICMS informado pelo optante vira o "ICMS" do item (LC 123/2006, art. 23, § 1º)
+    var fn = it.fornecedor || {};
+    if (fn.regime26 === 'simples' || fn.regime27 === 'simples') {
+      c.fornecedorSimples = true;
+      if (c26 && informado(fn.icmsSimplesPct)) c.icmsDestacado = r2(num(c26.vop) * num(fn.icmsSimplesPct) / 100);
+    }
     var cbt = (pf.cbsIbs || {}).tratamento;
     x.cbsIbs = cbt === 'reducao' && num(pf.cbsIbs.reducaoPct) > 0 ? { regime: 'REDUCAO', reducao: num(pf.cbsIbs.reducaoPct) }
       : cbt === 'aliquota_zero' ? { regime: 'ALIQ_ZERO', reducao: null } : cbt === 'isento' ? { regime: 'ISENTO', reducao: null } : { regime: 'NORMAL', reducao: null };
@@ -153,8 +176,11 @@
       emBranco: function (it) { return !String((it.produto && it.produto.descricao) || '').trim() && !num(it.valores && it.valores.valorUnitario); },
       criarEmpresa: function (d, eSrc) { var e = empresaLucroParaRtc(eSrc); this.empresas(d).push(e); return e; },
       criarContainer: function (d, emp, cSrc) { var op = N.rtc.model.novaOperacao(emp, cSrc.nome); (d.simulacoes = d.simulacoes || []).push(op); return op; },
-      copiar: function (d, emp, cont, itSrc, eSrc) {
-        var it = lucroParaRtc(itSrc, emp, eSrc);
+      copiar: function (d, emp, cont, itSrc, eSrc, opcoes, src) {
+        // a Lucratividade guarda 2026 e 2027 separados: o RTC recebe a nota de 2026 e o tratamento de 2027
+        var Mo = N.lucro.modelo, ativo = src && src.cenario;
+        var it = lucroParaRtc(Mo.noCenario(itSrc, '2026', ativo, 'item'), emp, Mo.noCenario(eSrc, '2026', ativo, 'empresa'),
+          Mo.noCenario(itSrc, '2027', ativo, 'item'), Mo.noCenario(eSrc, '2027', ativo, 'empresa'));
         cont.itens.push(it);
         if (!cont.itemAtivoId) cont.itemAtivoId = it.id;
         cont.atualizadoEm = new Date().toISOString();
@@ -216,7 +242,7 @@
             cDst = B.containers(dst, eDst).filter(function (c) { return c.sync === cSrc.sync; })[0];
             if (!cDst) { cDst = B.criarContainer(dst, eDst, cSrc); cDst.sync = cSrc.sync; rel.containersCriados++; }
           }
-          var novo = B.copiar(dst, eDst, cDst, itSrc, eSrc, o.opcoesRtc);
+          var novo = B.copiar(dst, eDst, cDst, itSrc, eSrc, o.opcoesRtc, src);
           novo.sync = itSrc.sync;
           novo.origemModulo = de;
           presentes[novo.sync] = true;
@@ -239,8 +265,6 @@
   function puxar(para) {
     var rtc = N.rtc && N.rtc.app, lucro = N.lucro && N.lucro.app;
     if (!rtc || !lucro || !N.rtc.model || !N.lucro.modelo) return null;
-    // só entre módulos liberados ao usuário: dados de um módulo sem acesso não são carregados nem gravados
-    if (N.auth && N.auth.acessaModulo && (!N.auth.acessaModulo('rtc') || !N.auth.acessaModulo('lucro'))) return null;
     var rel = sincronizar({ rtc: rtc.d, lucro: lucro.d, para: para, opcoesRtc: { parametros: rtc.d.parametros, aliquotasUF: rtc.d.aliquotasUF } });
     var apps = { rtc: rtc, lucro: lucro };
     if (rel.origemAlterada) apps[rel.de].store.saveNow();

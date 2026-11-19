@@ -12,8 +12,12 @@
  * Tributos sobre a venda vêm de uma lista configurável por cenário (CENARIOS): 2026 = ICMS + PIS/Cofins (ou DAS);
  * 2027 = ICMS + CBS e IBS por fora (ou DAS), com as mesmas regras e alíquotas do RTC Comparativo (LC 214/2025):
  *  - CBS e IBS por fora: não entram em Σ nem na receita; são somados ao preço e cobrados do cliente (CF, art. 156-A, § 1º, IX);
- *  - base da CBS e do IBS sem o ICMS (art. 12, § 2º, V); ICMS com CBS e IBS na base (entendimento da SEFAZ, premissa ligável);
+ *  - base da CBS e do IBS sem o ICMS e o ISS (art. 12, § 2º, V, de 2026 a 2032); ICMS com CBS e IBS na base (entendimento da SEFAZ,
+ *    premissa ligável), na venda e no ICMS da nota de compra; com liminar judicial, a CBS sai da base do ICMS da venda;
  *  - compra: CBS e IBS por fora na nota, com crédito integral no regime regular (art. 47); IPI zero (ADCT, art. 126, III);
+ *    com a nota de 2027 (CBS e IBS destacados informados), valem o ICMS, a CBS e o IBS destacados nela; sem ela, os valores
+ *    são projetados a partir dos dados de 2026 (dados2027 = 'projetado', sinalizado na tela). Fornecedor do Simples Nacional:
+ *    CBS e IBS dentro do DAS, sem destaque por fora; o crédito é o valor pago por ele, quando informado (art. 47, § 9º);
  *  - PIS e Cofins extintos (ADCT, art. 126, II).
  */
 (function (root) {
@@ -31,6 +35,8 @@
   };
   var CODIGOS_DAE = { '1023': 'ICMS Antecipado', '1031': 'ICMS-ST (entrada interestadual)' };
   var CENARIOS_INFO = { '2026': 'ICMS + PIS/Cofins (ou DAS)', '2027': 'ICMS + CBS e IBS por fora (ou DAS)' };
+  /** Aviso do cenário 2027 para quem não tem o RTC Comparativo */
+  var MSG_SEM_2027 = 'O cenário 2027 usa as regras e as alíquotas do RTC Comparativo e só está disponível para quem tem acesso a esse módulo. Fale com a Nexus Contabilidade para liberar.';
   /** Tratamento de CBS e IBS do item (vale para a compra e para a venda, como no RTC) */
   var REGIMES_CBS_IBS = { NORMAL: 'Alíquota de referência', REDUCAO: 'Redução de alíquota (%)', ALIQ_ZERO: 'Alíquota zero', ISENTO: 'Isenção' };
 
@@ -40,6 +46,17 @@
   function n(v) { var x = Number(v); return v === null || v === undefined || v === '' || !isFinite(x) ? 0 : x; }
   function informado(v) { return v !== null && v !== undefined && v !== '' && isFinite(Number(v)); }
   function fr(pct) { return n(pct) / 100; }
+
+  /**
+   * Trava do cenário 2027: só para quem tem acesso ao RTC Comparativo, de onde vêm as regras e as alíquotas de 2027.
+   * auth: o núcleo de acesso (Nexus.auth); sem ele (ou sem a função de módulos), liberado. Administrador acessa todos.
+   */
+  function pode2027(auth) {
+    if (auth === undefined) auth = N.auth;
+    return !auth || typeof auth.acessaModulo !== 'function' || !!auth.acessaModulo('rtc');
+  }
+  /** Cenário que vale de fato: o escolhido, mas 2027 volta para 2026 quando o usuário não tem o RTC */
+  function cenarioEfetivo(escolhido, auth) { return escolhido === '2027' && pode2027(auth) ? '2027' : '2026'; }
 
   /** Parâmetros padrão da empresa (percentuais em %, como digitados) */
   function parametrosPadrao() {
@@ -55,6 +72,7 @@
       margemAlvo: 15,
       // cenário 2027 (premissas iguais às do RTC)
       ibsCbsNaBaseIcms: true,     // IBS e CBS na base do ICMS (SEFAZ-SP e SEFAZ-MG; tema judicializado)
+      liminarCbsForaBaseIcms: false, // liminar judicial da empresa: CBS fora da base do ICMS da venda (o IBS continua)
       despesasSobreTotal: true,   // comissão e cartão sobre o total cobrado do cliente (com CBS e IBS)
       manterIpi2027: false        // IPI zero em 2027, exceto produtos com industrialização incentivada na ZFM
     };
@@ -110,12 +128,28 @@
     var regrasCE = String(p.uf || '').toUpperCase() === 'CE';
 
     var c27 = p.cenario === '2027';
+    // fornecedor do Simples: ICMS sem destaque (o valor informado é o crédito do art. 23, § 1º, da LC 123/2006)
+    var fornSN = !!c.fornecedorSimples;
+    var cbsNf = informado(c.cbsDestacada) ? n(c.cbsDestacada) : null, ibsNf = informado(c.ibsDestacado) ? n(c.ibsDestacado) : null;
+    // de onde vêm os dados de 2027: 'nf' (nota de 2027, com CBS e IBS destacados), 'simples' (fornecedor do Simples,
+    // sem destaque por fora) ou 'projetado' (os mesmos dados de 2026, projetados pelas regras do fisco)
+    var dados2027 = !c27 ? null : fornSN ? 'simples' : cbsNf != null || ibsNf != null ? 'nf' : 'projetado';
     // 2027: IPI reduzido a zero (exceto ZFM); CBS e IBS por fora na nota, sobre (valor da operação − ICMS destacado)
     var ipiCusto = c27 && !p.manterIpi2027 ? 0 : ipi;
     var vop = vm - dc + (icmsFrete > 0 ? 0 : frete) + seg; // frete com ICMS do CT-e é contratado fora da NF
     var a27 = c27 ? aliquotas2027(p, item) : null;
-    var baseCbsIbs = c27 ? Math.max(0, vop - icmsDest) : 0;
-    var cbsIn = c27 ? baseCbsIbs * a27.cbs : 0, ibsIn = c27 ? baseCbsIbs * a27.ibs : 0;
+    // 2027 com CBS e IBS na base do ICMS (premissa): o fornecedor mantém o valor da operação e passa a calcular o ICMS
+    // sobre (Vop + CBS + IBS). A alíquota efetiva sai da NF (ICMS destacado ÷ Vop): ICMS = t·Vop(1 + k) ÷ (1 + t·k), como no RTC.
+    // (só na projeção: a nota de 2027 já traz o ICMS calculado pelo fornecedor; o optante do Simples não destaca)
+    var icmsNota = icmsDest, tNota = 0, kIn = a27 ? a27.cbs + a27.ibs : 0;
+    if (dados2027 === 'projetado' && p.ibsCbsNaBaseIcms !== false && kIn > 0 && icmsDest > 0 && vop > 0) {
+      tNota = icmsDest / vop;
+      icmsDest = tNota * vop * (1 + kIn) / (1 + tNota * kIn);
+    }
+    var baseCbsIbs = c27 ? Math.max(0, vop - icmsDest) : 0; // sem o ICMS (art. 12, § 2º, V)
+    // CBS e IBS por fora no custo bruto: os destacados na nota de 2027; na projeção, base × alíquota; optante do Simples: dentro do preço
+    var cbsIn = dados2027 === 'nf' ? cbsNf || 0 : dados2027 === 'projetado' ? baseCbsIbs * a27.cbs : 0;
+    var ibsIn = dados2027 === 'nf' ? ibsNf || 0 : dados2027 === 'projetado' ? baseCbsIbs * a27.ibs : 0;
     var creditoCbsIbs = 0, motivoCbsIbs = '';
     var motivoIpi = c27 && ipi > 0 ? (p.manterIpi2027 ? 'IPI mantido em 2027 (produto com industrialização incentivada na Zona Franca de Manaus).' : 'IPI reduzido a zero a partir de 2027 (EC 132/2023, ADCT, art. 126, III; LC 214/2025, art. 454): o IPI da nota (' + (N.fmt ? N.fmt.brl(ipi) : ipi.toFixed(2)) + ') sai do custo.') : '';
 
@@ -133,7 +167,8 @@
           'O ICMS destacado na NF' + (icmsFrete ? ' e o ICMS do frete ficam' : ' fica') + ' no custo.';
       } else {
         creditoIcms = icmsDest + icmsFrete;
-        if (icmsDest) detalheIcms.push(['ICMS destacado na NF', icmsDest]);
+        if (icmsDest) detalheIcms.push([tNota ? 'ICMS destacado em 2027 (NF ' + (N.fmt ? N.fmt.brl(icmsNota) : icmsNota.toFixed(2)) + ' recalculado com CBS e IBS na base)'
+          : fornSN ? 'Crédito de ICMS informado pelo optante do Simples (LC 123/2006, art. 23, § 1º)' : dados2027 === 'nf' ? 'ICMS destacado na NF de 2027' : 'ICMS destacado na NF', icmsDest]);
         if (icmsFrete) detalheIcms.push(['ICMS do frete (CT-e)', icmsFrete]);
       }
       if (codigo === '1023') {
@@ -154,7 +189,7 @@
         var regPC = c.regimePisCofins || 'NORMAL';
         // regra do escritório: mercadoria − desconto − ICMS destacado na NF (inclusive o ICMS sobre o frete da NF).
         // Frete, seguro, IPI e DAE (1023 ou 1031) ficam fora; o ICMS do CT-e, que é do frete, também.
-        basePC = Math.max(0, vm - dc - icmsDest);
+        basePC = Math.max(0, vm - dc - (fornSN ? 0 : icmsDest)); // o optante do Simples não destaca o ICMS
         if (regPC !== 'NORMAL') motivoPC = 'Item ' + (REGIMES_PIS_COFINS[regPC] || regPC).toLowerCase() + ': sem crédito de PIS/Cofins (Leis 10.637/2002 e 10.833/2003, art. 3º, I, "b", e § 2º, II).';
         else if (c.fornecedorPjBrasil === false) motivoPC = 'Fornecedor que não é pessoa jurídica domiciliada no Brasil: sem crédito de PIS/Cofins (art. 3º, § 3º, I).';
         else creditoPC = basePC * (fr(ap.pis) + fr(ap.cofins));
@@ -164,14 +199,19 @@
     }
 
     if (c27) {
+      var pagoSN = (cbsNf || 0) + (ibsNf || 0);
       if (p.regime === 'SIMPLES') motivoCbsIbs = 'Simples Nacional: a CBS e o IBS pagos na compra ficam no custo, sem crédito (LC 214/2025, art. 47, § 9º).';
-      else if (!(a27.cbs + a27.ibs > 0)) motivoCbsIbs = 'Item com ' + (a27.regime === 'ISENTO' ? 'isenção' : 'alíquota zero') + ' de CBS e IBS: nada a creditar.';
+      else if (dados2027 === 'simples') {
+        creditoCbsIbs = pagoSN; // crédito do que o optante pagou no Simples, limitado ao devido (art. 47, § 9º)
+        motivoCbsIbs = 'Fornecedor do Simples Nacional: a CBS e o IBS ficam dentro do DAS dele, sem destaque por fora. ' +
+          (pagoSN > 0 ? 'Crédito da CBS e do IBS pagos por ele, informados na nota: ' : 'Sem o valor pago por ele informado na nota, não há crédito') + ' (LC 214/2025, art. 47, § 9º).';
+      } else if (!(cbsIn + ibsIn > 0)) motivoCbsIbs = dados2027 === 'nf' ? 'Nota de 2027 sem CBS e IBS destacados: nada a creditar.' : 'Item com ' + (a27.regime === 'ISENTO' ? 'isenção' : 'alíquota zero') + ' de CBS e IBS: nada a creditar.';
       else creditoCbsIbs = cbsIn + ibsIn; // não cumulatividade: crédito do valor destacado, quando pago (LC 214/2025, art. 47)
     }
 
     var cl = cb - creditoIcms - creditoPC - creditoCbsIbs;
     return {
-      cenario: c27 ? '2027' : '2026',
+      cenario: c27 ? '2027' : '2026', dados2027: dados2027, fornecedorSimples: fornSN,
       quantidade: q,
       custoBruto: cb, creditoIcms: creditoIcms, creditoIcmsPendente: pendente,
       basePisCofins: basePC, creditoPisCofins: creditoPC,
@@ -180,7 +220,7 @@
       custoLiquido: cl, custoLiquidoUnit: q > 0 ? cl / q : null,
       composicao: {
         valorMercadoria: vm, descontoCompra: dc, frete: frete, ipi: ipiCusto, ipiNota: ipi, seguroOutros: seg, dae: dae, daeCodigo: codigo,
-        icmsDestacado: icmsDest, icmsFrete: icmsFrete, valorOperacao: vop
+        icmsDestacado: icmsDest, icmsNota: icmsNota, icmsRecalculado2027: !!tNota, icmsFrete: icmsFrete, valorOperacao: vop
       },
       detalheIcms: detalheIcms, motivoIcms: motivoIcms, motivoPisCofins: motivoPC, motivoCbsIbs: motivoCbsIbs, motivoIpi: motivoIpi,
       alertas: alertas
@@ -240,12 +280,17 @@
       var k = a.cbs + a.ibs;
       var aliqIcms = informado(t.aliqIcms) ? n(t.aliqIcms) : n(p.aliqIcmsInternaPadrao);
       var ti = t.icmsSt ? 0 : fr(aliqIcms) * (1 - fr(t.reducaoBcIcms));
-      var grossUp = p.ibsCbsNaBaseIcms !== false && k > 0 && ti > 0;
-      var aIcms = grossUp ? ti * (1 + k) / (1 + ti * k) : ti;
+      // na base do ICMS: CBS + IBS (SEFAZ); com liminar, só o IBS. kb = parte por fora que entra na base
+      var liminar = p.ibsCbsNaBaseIcms !== false && !!p.liminarCbsForaBaseIcms;
+      var kb = p.ibsCbsNaBaseIcms !== false ? (liminar ? 0 : a.cbs) + a.ibs : 0;
+      var grossUp = kb > 0 && ti > 0;
+      var aIcms = grossUp ? ti * (1 + kb) / (1 + ti * kb) : ti;
       var lista = [
         { id: 'icms', nome: t.icmsSt ? 'ICMS (item com ST: sem débito na venda)' : 'ICMS próprio', aliq: aIcms,
-          formula: t.icmsSt ? 'Tributação encerrada pela substituição tributária' : grossUp ? 'Alíquota × (PLD + CBS + IBS) = PLD × t(1 + k) ÷ (1 + t·k)' : 'PLD × alíquota × (1 − redução da base)',
-          fund: 'LC 87/1996, art. 13, § 1º' + (grossUp ? '; SEFAZ-SP e SEFAZ-MG (consultas): CBS e IBS na base do ICMS a partir de 2027 — tema judicializado' : '') },
+          formula: t.icmsSt ? 'Tributação encerrada pela substituição tributária'
+            : grossUp ? (liminar ? 'Alíquota × (PLD + IBS) = PLD × t(1 + i) ÷ (1 + t·i) — liminar: CBS fora da base' : 'Alíquota × (PLD + CBS + IBS) = PLD × t(1 + k) ÷ (1 + t·k)')
+            : 'PLD × alíquota × (1 − redução da base)' + (liminar ? ' — liminar: CBS fora da base' : ''),
+          fund: 'LC 87/1996, art. 13, § 1º' + (p.ibsCbsNaBaseIcms !== false && !t.icmsSt ? '; SEFAZ-SP e SEFAZ-MG (consultas): CBS e IBS na base do ICMS a partir de 2027 — tema judicializado' + (liminar ? '; liminar judicial da empresa: CBS fora da base' : '') : '') },
         { id: 'cbs', nome: 'CBS', fora: true, aliq: a.cbs * (1 - aIcms),
           formula: a.cbs ? '(PLD − ICMS) × ' + (a.cbs * 100).toFixed(2).replace('.', ',') + '%' : 'Item sem CBS (' + REGIMES_CBS_IBS[a.regime].toLowerCase() + ')',
           fund: 'LC 214/2025, art. 12, § 2º, V, e arts. 347 e 349; CF, art. 195, § 17' },
@@ -516,7 +561,7 @@
 
   LC.motor = {
     REGIMES: REGIMES, REGIMES_PIS_COFINS: REGIMES_PIS_COFINS, REGIMES_CBS_IBS: REGIMES_CBS_IBS, MODOS: MODOS, CODIGOS_DAE: CODIGOS_DAE,
-    CENARIOS: CENARIOS, CENARIOS_INFO: CENARIOS_INFO, referencia2027: referencia2027, aliquotas2027: aliquotas2027,
+    CENARIOS: CENARIOS, CENARIOS_INFO: CENARIOS_INFO, MSG_SEM_2027: MSG_SEM_2027, pode2027: pode2027, cenarioEfetivo: cenarioEfetivo, referencia2027: referencia2027, aliquotas2027: aliquotas2027,
     contagem: contagem, parametrosPadrao: parametrosPadrao, aliquotasPisCofins: aliquotasPisCofins, tributacaoPadrao: tributacaoPadrao,
     calcularCompra: calcularCompra, calcularSigma: calcularSigma, calcularResultado: calcularResultado, fracaoPisCofins: fracaoPisCofins,
     precoParaMargem: precoParaMargem, precoPorModo: precoPorModo, calculadora: calculadora, calcularItem: calcularItem, totais: totais, dre: dre

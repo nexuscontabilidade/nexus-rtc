@@ -65,7 +65,9 @@
         creditoTrib: c27 ? c.creditoCbsIbs || 0 : c.creditoPisCofins, custoLiquido: c.custoLiquido, clUnit: c.custoLiquidoUnit,
         pv: r.erro ? null : r.pv, pld: r.erro ? null : r.pld, totalCliente: r.erro ? null : r.totalCliente, lucroUnit: r.erro ? null : r.lucro, lucroTotal: r.erro ? null : r.lucroTotal,
         margem: r.erro ? null : r.margem, situacao: SITUACAO[situacao(r, p)], faixa: situacao(r, p),
-        alertas: (r.alertas || []).map(function (a) { return a.msg; })
+        alertas: (r.alertas || []).map(function (a) { return a.msg; }),
+        dados2027: c27 ? c.dados2027 : null,
+        rotuloDados2027: c27 ? ({ nf: 'Nota de 2027', simples: 'Fornecedor do Simples', projetado: 'Projetado (dados de 2026)' }[c.dados2027] || '') : ''
       };
     });
     var dreItens = o.incluirDre === false ? [] : lista.filter(function (x) { return !x.r.erro; }).map(function (x) {
@@ -106,7 +108,7 @@
       notas: (c27 ? [
         'Cenário 2027 (LC 214/2025): PIS e Cofins extintos (EC 132/2023, ADCT, art. 126, II); CBS à alíquota de referência menos 0,1 ponto percentual (arts. 347 e 349) e IBS de 0,1% (art. 344), com as alíquotas dos Parâmetros do RTC Comparativo.' + (ref && ref.status !== 'oficial' ? ' A alíquota de referência da CBS ainda não é oficial (Resolução do Senado).' : ''),
         'Custo líquido de aquisição = custo bruto (mercadoria − desconto + frete + IPI + seguro/outros + DAE + CBS + IBS) − créditos de ICMS, CBS e IBS. Compra: CBS e IBS por fora sobre (valor da operação − ICMS destacado), com crédito integral no regime regular (art. 47); no Simples, sem crédito (art. 47, § 9º). IPI zero a partir de 2027 (ADCT, art. 126, III; LC 214/2025, art. 454), salvo ZFM.',
-        'Venda: CBS e IBS por fora, sobre o preço sem o ICMS (art. 12, § 2º, V): somados ao preço e pagos pelo cliente, fora da receita bruta e do lucro (DL 1.598/1977, art. 12, § 4º).' + (p.ibsCbsNaBaseIcms !== false ? ' ICMS com CBS e IBS na base, conforme entendimento da SEFAZ-SP e da SEFAZ-MG (tema judicializado).' : '') + (p.despesasSobreTotal !== false ? ' Comissão e cartão sobre o total cobrado do cliente.' : ''),
+        'Venda: CBS e IBS por fora, sobre o preço sem o ICMS e o ISS (art. 12, § 2º, V): somados ao preço e pagos pelo cliente, fora da receita bruta e do lucro (DL 1.598/1977, art. 12, § 4º).' + (p.ibsCbsNaBaseIcms !== false ? ' ICMS com CBS e IBS na base, conforme entendimento da SEFAZ-SP e da SEFAZ-MG (tema judicializado), na venda e no ICMS da nota de compra' + (p.liminarCbsForaBaseIcms ? '; por liminar judicial da empresa, a CBS fica fora da base do ICMS das vendas.' : '.') : '') + (p.despesasSobreTotal !== false ? ' Comissão e cartão sobre o total cobrado do cliente.' : ''),
         'Item com DAE 1031 (ICMS-ST): sem crédito de ICMS e sem ICMS na venda. DAE 1023 (ICMS antecipado): crédito de ICMS depois do pagamento (Decreto 33.327/2019, art. 61, § 5º).'
       ] : [
         'Custo líquido de aquisição = custo bruto (mercadoria − desconto + frete + IPI + seguro/outros + DAE) − créditos de ICMS e de PIS/Cofins do regime.',
@@ -153,19 +155,20 @@
 
     var c27 = dd.cenario === '2027';
     var I = [cab(['Código', 'Descrição', 'NCM', 'Quantidade', 'Custo bruto', 'Crédito ICMS', 'Crédito ' + dd.rotuloCredito, 'Custo líquido', 'CL unitário', 'Preço de venda (un.)', 'PLD (un.)']
-      .concat(c27 ? ['Total ao cliente com CBS e IBS (un.)'] : []).concat(['Lucro (un.)', 'Lucro da linha', 'Margem', 'Situação', 'Alertas']))];
+      .concat(c27 ? ['Total ao cliente com CBS e IBS (un.)'] : []).concat(['Lucro (un.)', 'Lucro da linha', 'Margem', 'Situação', 'Alertas']).concat(c27 ? ['Dados de 2027'] : []))];
     dd.itens.forEach(function (x) {
       I.push([{ v: x.codigo, s: 'textoFmt' }, { v: x.descricao, s: 'texto' }, { v: x.ncm, s: 'textoFmt' }, { v: x.quantidade, s: 'num' }, { v: x.custoBruto, s: 'moeda' }, { v: x.creditoIcms, s: 'moeda' },
         { v: x.creditoTrib, s: 'moeda' }, { v: x.custoLiquido, s: 'moeda' }, { v: x.clUnit, s: 'moeda' }, { v: x.pv, s: 'moeda' }, { v: x.pld, s: 'moeda' }]
         .concat(c27 ? [{ v: x.totalCliente, s: 'moeda' }] : [])
-        .concat([{ v: x.lucroUnit, s: 'moeda' }, { v: x.lucroTotal, s: 'moedaNegrito' }, { v: x.margem, s: 'pct' }, { v: x.situacao, s: 'texto' }, { v: x.alertas.join(' | '), s: 'texto' }]));
+        .concat([{ v: x.lucroUnit, s: 'moeda' }, { v: x.lucroTotal, s: 'moedaNegrito' }, { v: x.margem, s: 'pct' }, { v: x.situacao, s: 'texto' }, { v: x.alertas.join(' | '), s: 'texto' }])
+        .concat(c27 ? [{ v: x.rotuloDados2027, s: 'texto' }] : []));
     });
     I.push([{ v: 'Total', s: 'negrito' }, { v: dd.itens.length + ' item(ns)', s: 'texto' }, { v: '', s: 'texto' }, { v: '', s: 'texto' }, { v: s.custoBruto, s: 'moedaNegrito' }, { v: '', s: 'texto' },
       { v: '', s: 'texto' }, { v: s.custoLiquido, s: 'moedaNegrito' }, { v: '', s: 'texto' }, { v: '', s: 'texto' }, { v: '', s: 'texto' }]
       .concat(c27 ? [{ v: '', s: 'texto' }] : []).concat([{ v: '', s: 'texto' }, { v: s.lucro, s: 'moedaNegrito' }, { v: s.margem, s: 'pct' }]));
     var sheets = [
       { name: 'Resumo', cols: [46, 30, 12, 12], rows: R, merges: mergesResumo, retrato: true },
-      { name: 'Itens', cols: [12, 34, 11, 10, 14, 13, 14, 14, 12, 14, 12].concat(c27 ? [16] : []).concat([12, 14, 10, 16, 50]), rows: I, freeze: 1 }
+      { name: 'Itens', cols: [12, 34, 11, 10, 14, 13, 14, 14, 12, 14, 12].concat(c27 ? [16] : []).concat([12, 14, 10, 16, 50]).concat(c27 ? [24] : []), rows: I, freeze: 1 }
     ];
     if (dd.dreItens.length) {
       var DI = [cab(['Item', 'Linha da DRE', 'Por unidade', 'Total da linha', 'AV %'])];
@@ -270,10 +273,18 @@
     secao('Resultado por item');
     tabela({ head: [['Código', 'Descrição', 'Qtd', 'Custo líquido (un.)', 'Preço (un.)', 'Lucro (un.)', 'Lucro da linha', 'Margem', 'Situação']],
       body: dd.itens.map(function (x) {
-        return [safe(x.codigo), safe(x.descricao + (x.ncm ? ' (NCM ' + x.ncm + ')' : '')), safe(F.num(x.quantidade, x.quantidade % 1 ? 4 : 0)), brl(x.clUnit), brl(x.pv), brl(x.lucroUnit),
+        return [safe(x.codigo + (x.dados2027 === 'projetado' ? ' (*)' : '')), safe(x.descricao + (x.ncm ? ' (NCM ' + x.ncm + ')' : '')), safe(F.num(x.quantidade, x.quantidade % 1 ? 4 : 0)), brl(x.clUnit), brl(x.pv), brl(x.lucroUnit),
           { content: brl(x.lucroTotal), styles: { fontStyle: 'bold' } }, safe(pct(x.margem)), { content: safe(x.situacao), styles: { textColor: cor(x.faixa), fontStyle: 'bold' } }];
       }).concat([[{ content: 'Total', styles: { fontStyle: 'bold' } }, '', '', brl(s.custoLiquido), '', '', { content: brl(s.lucro), styles: { fontStyle: 'bold' } }, { content: safe(pct(s.margem)), styles: { fontStyle: 'bold' } }, '']]),
       columnStyles: { 0: { cellWidth: 20 }, 2: { halign: 'right', cellWidth: 14 }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right' }, 7: { halign: 'right', cellWidth: 18 }, 8: { cellWidth: 30 } } });
+
+    var nProj = dd.itens.filter(function (x) { return x.dados2027 === 'projetado'; }).length;
+    if (nProj) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor.apply(doc, TINTA);
+      garantir(6);
+      doc.text(safe('(*) ' + nProj + ' produto(s) com os mesmos dados de 2026, sem o destaque da CBS e do IBS na nota: valores de 2027 projetados pelas regras do fisco.'), M, y + 1);
+      y += 5;
+    }
 
     secao('DRE da análise (Lei 6.404/1976, art. 187)');
     tabela({ head: [['Linha', 'Total (R$)', 'AV %']], body: dreBody(dd.dre, false), tableWidth: 170, columnStyles: { 0: { cellWidth: 110 } } });

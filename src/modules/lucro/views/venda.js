@@ -15,10 +15,13 @@
   function modoTexto(modo, p) {
     if (modo !== 'PRECO_SEM_PIS_COFINS') return MODO_TXT[modo] || '';
     if (p && p.regime === 'SIMPLES') return 'Você digita o preço de hoje. No Simples Nacional, o PIS e a Cofins estão dentro do DAS, que continua em 2027: o preço fica igual.';
-    if (p && p.cenario === '2027') return 'Você digita o preço de hoje (com PIS e Cofins) e o sistema retira o PIS e a Cofins embutidos nele. A CBS e o IBS entram por fora.';
-    return 'Você digita o preço de hoje (com PIS e Cofins). Em 2026 ele vale como está; no cenário 2027, o sistema retira o PIS e a Cofins embutidos nele.';
+    return 'Você digita o preço de hoje (com PIS e Cofins) e o sistema retira o PIS e a Cofins embutidos nele. A CBS e o IBS entram por fora.';
   }
   LC.views.modoTexto = modoTexto;
+  /** "Preço sem PIS/Cofins" só existe no cenário 2027; em 2026 o item com esse modo aparece como preço informado (o preço de hoje) */
+  function modoEfetivo(modo, p) { return modo === 'PRECO_SEM_PIS_COFINS' && !(p && p.cenario === '2027') ? 'PRECO_INFORMADO' : modo; }
+  LC.views.modoEfetivo = modoEfetivo;
+  function opcoesModo(p) { return MODOS_OPCOES.filter(function (o) { return o[0] !== 'PRECO_SEM_PIS_COFINS' || (p && p.cenario === '2027'); }); }
   /** Opções de "Como formar o preço" (tela do item e venda padrão) */
   var MODOS_OPCOES = [['MARKUP_COM_DESPESAS', '1 · Markup com despesas', 'PV = CL × markup'], ['MARKUP_SEM_DESPESAS', '2 · Markup sem despesas', 'despesas acrescidas por dentro'],
     ['PRECO_INFORMADO', '3 · Preço informado', 'você digita o preço'], ['PRECO_SEM_PIS_COFINS', '4 · Preço sem PIS/Cofins', 'retira o PIS e a Cofins do preço de hoje']];
@@ -31,7 +34,7 @@
     var icms = c.detalheIcms.map(function (x) { return x[0] + ': ' + F.brl(x[1]); }).join('\n') || c.motivoIcms || 'Sem crédito de ICMS.';
     var c27 = c.cenario === '2027';
     var pc = LC.views.dicaTrib(c);
-    return '<div class="nx-kpis k4">' +
+    return LC.views.aviso2027(c) + '<div class="nx-kpis k4">' +
       U.kpi({ rotulo: 'Custo bruto', valor: F.brl(c.custoBruto), sub: c.quantidade + ' un. · ' + (c.quantidade ? F.unit(c.custoBruto / c.quantidade) + ' por unidade' : '') + (c27 && (c.cbsEntrada + c.ibsEntrada) ? ' · com CBS e IBS ' + F.brl(c.cbsEntrada + c.ibsEntrada) : ''), dica: 'Tudo o que se paga na compra' + (c27 ? ', inclusive a CBS e o IBS cobrados por fora' : '') + '.' }) +
       '<div class="lc-dica-kpi" title="' + esc(icms + (c.creditoIcmsPendente ? '\nDAE 1023 a apropriar: ' + F.brl(c.creditoIcmsPendente) : '')) + '">' + U.kpi({ rotulo: 'Crédito de ICMS', valor: F.brl(c.creditoIcms), sub: c.creditoIcmsPendente ? '+ ' + F.brl(c.creditoIcmsPendente) + ' a apropriar (1023 não pago)' : 'passe o mouse para o detalhe' }) + '</div>' +
       '<div class="lc-dica-kpi" title="' + esc(pc) + '">' + U.kpi({ rotulo: c27 ? 'Crédito de CBS e IBS' : 'Crédito de PIS/Cofins', valor: F.brl(LC.views.creditoTrib(c)), sub: 'passe o mouse para o detalhe' }) + '</div>' +
@@ -63,17 +66,13 @@
     var it = L.item(id);
     if (!it || it.venda.modo !== 'PRECO_SEM_PIS_COFINS') return '';
     var p = L.params(L.analise()), r = L.resultado(it), dc = r.descontaminacao;
-    if (!dc) return '';
+    if (!dc || p.cenario !== '2027') return '';
     var t = L.calculadora(it, p).trib, ap = M.aliquotasPisCofins(p);
     var reg = t.regimePisCofins || 'NORMAL';
     if (p.regime === 'SIMPLES') return '<p class="nx-note lc-descont-nota">No Simples Nacional não há PIS e Cofins separados para retirar: eles estão dentro do DAS.</p>';
     if (reg !== 'NORMAL') return '<p class="nx-note lc-descont-nota">Item sem PIS e Cofins na venda (' + esc(M.REGIMES_PIS_COFINS[reg].toLowerCase()) + '): não há o que retirar do preço.</p>';
     var f = L.calculadora(it, p).fracaoPisCofins;
     var regra = 'PIS ' + F.pct(ap.pis) + ' + Cofins ' + F.pct(ap.cofins) + ' sobre (preço − ICMS) = ' + F.pct(f * 100) + ' do preço';
-    if (!dc.aplicada) {
-      var em27 = M.precoPorModo(it.venda, 0, 0, { fracaoPisCofins: f, cenario2027: true }).descontaminacao; // o mesmo cálculo do cenário 2027
-      return '<p class="nx-note lc-descont-nota">Em 2026 o PIS e a Cofins continuam: o preço de hoje vale como está. No cenário 2027, o preço cai <b>' + F.unit(em27.retiradoPreco) + '</b> por unidade, para ' + F.unit(dc.precoAtual - em27.retiradoPreco) + ' (' + esc(regra) + ').</p>';
-    }
     return '<dl class="lc-descont" aria-label="Preço sem PIS e Cofins">' +
       '<div><dt>Preço de hoje</dt><dd>' + F.unit(dc.precoAtual) + '</dd></div>' +
       '<div><dt>(−) PIS e Cofins embutidos</dt><dd>' + F.unit(dc.retiradoPreco) + '</dd><small>' + esc(regra) + '</small></div>' +
@@ -183,16 +182,18 @@
     var v = it.venda;
     function c(o) { o.scope = 'item'; o.id = it.id; if (o.valor === undefined) o.valor = N.store.getPath(it, o.path); return U.campo(o); }
     var pvAtual = r && !r.erro ? r.pv : v.precoVenda;
-    var precoHoje = v.modo === 'PRECO_SEM_PIS_COFINS' ? c({ rotulo: 'Preço de hoje', path: 'venda.precoAtual', tipo: 'unit', largura: 'sm', dica: 'O preço que você pratica hoje, com o PIS e a Cofins embutidos. O sistema retira esses tributos no cenário 2027.' }) : '';
-    var markup = v.modo === 'MARKUP_COM_DESPESAS' || v.modo === 'MARKUP_SEM_DESPESAS' ? c({ rotulo: 'Markup', path: 'venda.markup', tipo: 'num', largura: 'xs', dica: v.modo === 'MARKUP_COM_DESPESAS' ? 'PV = CL × markup. Despesas e tributos só mostram quanto sobra de lucro.' : 'O markup gera o preço-base e o sistema acrescenta as despesas por dentro (gross-up): PV = CL × M ÷ ((1 − d)(1 − Σ)).' }) : '';
+    var modo = modoEfetivo(v.modo, p); // em 2026, o modo 4 aparece como preço informado
+    var precoHoje = modo === 'PRECO_SEM_PIS_COFINS' ? c({ rotulo: 'Preço de hoje', path: 'venda.precoAtual', tipo: 'unit', largura: 'sm', dica: 'O preço que você pratica hoje, com o PIS e a Cofins embutidos. O sistema retira esses tributos no cenário 2027.' }) : '';
+    var markup = modo === 'MARKUP_COM_DESPESAS' || modo === 'MARKUP_SEM_DESPESAS' ? c({ rotulo: 'Markup', path: 'venda.markup', tipo: 'num', largura: 'xs', dica: modo === 'MARKUP_COM_DESPESAS' ? 'PV = CL × markup. Despesas e tributos só mostram quanto sobra de lucro.' : 'O markup gera o preço-base e o sistema acrescenta as despesas por dentro (gross-up): PV = CL × M ÷ ((1 − d)(1 − Σ)).' }) : '';
     var margemCampo = '<label class="nx-field w-sm"><span class="nx-label">Margem desejada<span class="nx-tip" tabindex="0" title="Digite a margem e o sistema preenche o preço (PV para a margem). O preço passa a valer como informado.">?</span></span><span class="nx-input-wrap has-suffix"><input class="nx-input is-num" type="text" inputmode="decimal" autocomplete="off" data-lc-margem="' + esc(it.id) + '" value="' + (r && !r.erro && r.margem != null ? esc(F.inputValue(r.margem * 100, 'pct')) : '') + '" aria-label="Margem desejada"><span class="nx-suffix">%</span></span><span class="nx-err" aria-live="polite"></span></label>';
     var preco = U.cartao({ eyebrow: 'Venda do item', titulo: 'Preço e deduções',
-      corpo: U.segmento({ compacto: true, scope: 'item', id: it.id, path: 'venda.modo', valor: v.modo, rotulo: 'Como formar o preço', opcoes: MODOS_OPCOES }) +
-        '<p class="nx-note lc-modo-nota">' + esc(modoTexto(v.modo, p)) + '</p>' +
+      corpo: U.segmento({ compacto: true, scope: 'item', id: it.id, path: 'venda.modo', valor: modo, rotulo: 'Como formar o preço', opcoes: opcoesModo(p) }) +
+        '<p class="nx-note lc-modo-nota">' + esc(modoTexto(modo, p)) + '</p>' +
+        (modo !== v.modo ? '<p class="nx-note">No cenário 2027, este item usa <b>Preço sem PIS/Cofins</b>. Em 2026 vale o preço de hoje.</p>' : '') +
         '<div class="nx-form-grid">' + precoHoje + markup +
           c({ rotulo: 'Preço de venda (unitário)', path: 'venda.precoVenda', tipo: 'unit', largura: 'sm', valor: pvAtual, dica: 'Em qualquer modo, o preço fica editável: ao digitar, ele passa a valer como preço informado.' }) +
           margemCampo +
-        '</div>' + (v.modo === 'PRECO_SEM_PIS_COFINS' ? '<div data-lc-live="venda-descont" data-lc-id="' + esc(it.id) + '">' + LC.live['venda-descont'](L, it.id) + '</div>' : '') +
+        '</div>' + (modo === 'PRECO_SEM_PIS_COFINS' ? '<div data-lc-live="venda-descont" data-lc-id="' + esc(it.id) + '">' + LC.live['venda-descont'](L, it.id) + '</div>' : '') +
         '<div class="nx-form-grid">' +
           U.selecao({ scope: 'item', id: it.id, path: 'venda.descontoTipo', valor: v.descontoTipo || 'pct', rotulo: 'Desconto em', largura: 'xs', opcoes: [['pct', '%'], ['valor', 'R$ por un.']] }) +
           c({ rotulo: 'Desconto incondicional', path: 'venda.desconto', tipo: v.descontoTipo === 'valor' ? 'unit' : 'pct', largura: 'sm' }) +
@@ -220,11 +221,11 @@
   };
 
   function vendaPadrao(L) {
-    var an = L.analise(), vp = an.vendaPadrao;
+    var an = L.analise(), vp = an.vendaPadrao, pv = L.params(an);
     function c(o) { o.scope = 'ana'; o.valor = N.store.getPath(an, o.path); return U.campo(o); }
     return '<details class="nx-card nx-details lc-venda-padrao"><summary><span class="nx-eyebrow">Planilha inteira</span><strong>Venda padrão da análise</strong><small>Escolha o modo, o markup e as despesas uma vez e aplique a todos os itens</small></summary><div class="nx-card-body">' +
-      U.segmento({ compacto: true, scope: 'ana', path: 'vendaPadrao.modo', valor: vp.modo, rotulo: 'Como formar o preço', opcoes: MODOS_OPCOES.map(function (o) { return [o[0], o[1], '']; }) }) +
-      (vp.modo === 'PRECO_SEM_PIS_COFINS' ? '<p class="nx-note">Cada item usa o próprio preço atual como preço de hoje; o PIS e a Cofins saem no cenário 2027.</p>' : '') +
+      U.segmento({ compacto: true, scope: 'ana', path: 'vendaPadrao.modo', valor: modoEfetivo(vp.modo, pv), rotulo: 'Como formar o preço', opcoes: opcoesModo(pv).map(function (o) { return [o[0], o[1], '']; }) }) +
+      (modoEfetivo(vp.modo, pv) === 'PRECO_SEM_PIS_COFINS' ? '<p class="nx-note">Cada item usa o próprio preço atual como preço de hoje, sem o PIS e a Cofins embutidos.</p>' : '') +
       '<div class="nx-form-grid">' + (vp.modo === 'MARKUP_COM_DESPESAS' || vp.modo === 'MARKUP_SEM_DESPESAS' ? c({ rotulo: 'Markup', path: 'vendaPadrao.markup', tipo: 'num', largura: 'xs' }) : '') +
         U.selecao({ scope: 'ana', path: 'vendaPadrao.descontoTipo', valor: vp.descontoTipo || 'pct', rotulo: 'Desconto em', largura: 'xs', opcoes: [['pct', '%'], ['valor', 'R$ por un.']] }) +
         c({ rotulo: 'Desconto', path: 'vendaPadrao.desconto', tipo: vp.descontoTipo === 'valor' ? 'unit' : 'pct', largura: 'sm' }) +
@@ -250,7 +251,7 @@
 
   function rotuloItem(x) {
     var r = x.r;
-    return (x.item.codigo ? x.item.codigo + ' — ' : '') + (x.item.descricao || 'Item sem descrição') + ' · ' +
+    return (LC.views.projetado2027(r.compra) ? '⚠ ' : '') + (x.item.codigo ? x.item.codigo + ' — ' : '') + (x.item.descricao || 'Item sem descrição') + ' · ' +
       (r.erro ? 'sem preço' : 'margem ' + F.pct(r.margem * 100) + (r.faixa === 'negativa' ? ' (prejuízo)' : r.faixa === 'abaixo' ? ' (abaixo da meta)' : ''));
   }
 

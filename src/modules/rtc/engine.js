@@ -369,6 +369,15 @@
       icms = n(pf.icms.valorEntradaInformado);
       icmsFormula = 'Valor informado (NF)';
       icmsBase = baseIcms;
+      // 2027 com IBS/CBS na base do ICMS: a alíquota efetiva da NF (ICMS ÷ base de 2026) passa a incidir sobre (Vop + IBS + CBS)
+      var base26 = r2(prodInf + freteNF + seg + desp - desc) + (pr.ipiNaBaseIcms && has(v.ipi) ? n(v.ipi) : 0);
+      if (ano === 2027 && pr.ibsCbsNaBaseIcms2027 && k > 0 && icms > 0 && base26 > 0) {
+        var tNf = icms / base26;
+        icms = tNf * (baseIcms + k * vop) / (1 + tNf * k);
+        icmsBase = baseIcms + k * (vop - icms);
+        icmsFormula = 'ICMS da NF (' + fm.brl(n(pf.icms.valorEntradaInformado)) + ' = ' + fm.pct(tNf * 100, 4) + ' da base de 2026) recalculado com IBS/CBS na base: t·(Vop·(1+k)) ÷ (1 + t·k)';
+        icmsInformado = 'recalculado';
+      }
     } else if (ano === 2027 && pr.ibsCbsNaBaseIcms2027 && k > 0) {
       icms = t * (baseIcms + k * vop) / (1 + t * k);
       icmsBase = baseIcms + k * (vop - icms);
@@ -380,7 +389,7 @@
     }
     icms = r2(icms);
     if (!fornSNicms || icms) {
-      linha({ grupo: 'Aquisição', item: 'ICMS próprio destacado (embutido no valor)', entrada: ctx.icmsEnt.desc, base: icmsBase != null ? r2(icmsBase) : null, aliq: ctx.icmsEnt.aliq, formula: icmsFormula, valor: icms, origem: icmsInformado ? 'Informado' : ctx.icmsEnt.origem, fund: ['lc87_a13_p1'].concat(ctx.icmsEnt.fund || []).concat(ano === 2027 && pr.ibsCbsNaBaseIcms2027 && k > 0 ? ['fisco_icms_ibscbs'] : []), vig: VIG.icms, info: true, obs: 'Já incluído no valor da operação (cálculo por dentro).' + (pr.ipiNaBaseIcms ? ' IPI incluído na base.' : ' IPI fora da base (LC 87, art. 13, § 2º).') });
+      linha({ grupo: 'Aquisição', item: 'ICMS próprio destacado (embutido no valor)', entrada: ctx.icmsEnt.desc, base: icmsBase != null ? r2(icmsBase) : null, aliq: ctx.icmsEnt.aliq, formula: icmsFormula, valor: icms, origem: icmsInformado === 'recalculado' ? 'Calculado (NF de 2026)' : icmsInformado ? 'Informado' : ctx.icmsEnt.origem, fund: ['lc87_a13_p1'].concat(ctx.icmsEnt.fund || []).concat(ano === 2027 && pr.ibsCbsNaBaseIcms2027 && k > 0 ? ['fisco_icms_ibscbs'] : []), vig: VIG.icms, info: true, obs: 'Já incluído no valor da operação (cálculo por dentro).' + (pr.ipiNaBaseIcms ? ' IPI incluído na base.' : ' IPI fora da base (LC 87, art. 13, § 2º).') });
     }
 
     var cbsIn = r2(cbsInRate * (vop - icms));
@@ -667,16 +676,19 @@
         t = ctx.icmsSai.aliq / 100 * (trat === 'reducao_base' ? (1 - d(pf.icms.reducaoSaida)) : 1);
         icmsFund = icmsFund.concat(ctx.icmsSai.fund || []);
       }
-      var grossUp = ano === 2027 && pr.ibsCbsNaBaseIcms2027 && k > 0 && t > 0;
-      var aIcms = grossUp ? t * (1 + k) / (1 + t * k) : t;
+      // na base do ICMS: IBS + CBS (SEFAZ); com liminar judicial da empresa, só o IBS (kb = parte por fora na base)
+      var liminar = ano === 2027 && pr.ibsCbsNaBaseIcms2027 && !!pr.liminarCbsForaBaseIcms2027;
+      var kb = liminar ? i : k;
+      var grossUp = ano === 2027 && pr.ibsCbsNaBaseIcms2027 && kb > 0 && t > 0;
+      var aIcms = grossUp ? t * (1 + kb) / (1 + t * kb) : t;
       items.push({
         id: 'icms', nome: 'ICMS próprio', tipo: 'dentro', a: aIcms, b: 0,
         aliq: ctx.icmsSai.aliq * (trat === 'reducao_base' ? (1 - d(pf.icms.reducaoSaida)) : 1),
         baseA: t > 0 ? aIcms / t : 1, baseB: 0,
         entrada: semDebito || trat === 'isento' || trat === 'diferido' ? '—' : ctx.icmsSai.desc,
-        formula: grossUp ? 'alíq × (X + CBS + IBS), CBS/IBS = k·(X − ICMS) ⇒ ICMS = X · t(1+k)/(1+t·k)' : (trat === 'reducao_base' ? 'X × alíq × (1 − redução ' + fm.pct(n(pf.icms.reducaoSaida)) + ')' : 'X × alíquota (por dentro)'),
+        formula: grossUp ? (liminar ? 'alíq × (X + IBS), IBS = i·(X − ICMS) ⇒ ICMS = X · t(1+i)/(1+t·i) — liminar: CBS fora da base' : 'alíq × (X + CBS + IBS), CBS/IBS = k·(X − ICMS) ⇒ ICMS = X · t(1+k)/(1+t·k)') : (trat === 'reducao_base' ? 'X × alíq × (1 − redução ' + fm.pct(n(pf.icms.reducaoSaida)) + ')' : 'X × alíquota (por dentro)'),
         natureza: 'Por dentro', origem: ctx.icmsSai.origem, fund: icmsFund.concat(grossUp ? ['fisco_icms_ibscbs'] : []), vig: VIG.icms,
-        obs: icmsObs || (grossUp ? 'Premissa: IBS/CBS integram a base do ICMS a partir de 2027 (entendimento de SEFAZ; tema judicializado).' : '')
+        obs: icmsObs || (grossUp ? 'Premissa: IBS/CBS integram a base do ICMS a partir de 2027 (entendimento de SEFAZ; tema judicializado).' + (liminar ? ' Por liminar judicial da empresa, a CBS fica fora da base.' : '') : '')
       });
     }
     var aIcmsVal = items.length && items[0].id === 'icms' ? items[0].a : 0;
@@ -1121,7 +1133,8 @@
     L.push('IBS 2027: ' + fm.pct(pv.ibsUf2027) + ' estadual + ' + fm.pct(pv.ibsMun2027) + ' municipal (LC 214, art. 344).');
     L.push('Alíquotas-teste de 2026 (CBS 0,9% e IBS 0,1%) tratadas como informativas, sem ônus (LC 214, art. 348).');
     L.push('Valor dos produtos em 2027: ' + ({ mesmo: 'mesmo valor de 2026, com CBS/IBS acrescidos por fora pelo fornecedor', sem_pis_cofins: 'valor de 2026 sem os PIS/Cofins embutidos do fornecedor (' + fm.pct(n(sim.fornecedor.pisCofinsEmbutidoPct)) + ')', manual: 'informado manualmente (' + fm.brl(n(pr.valorProdutos2027Manual)) + ')' }[pr.valorProdutos2027] || '—') + '.');
-    if (ctx.icmsRegular) L.push('IBS/CBS ' + (pr.ibsCbsNaBaseIcms2027 ? 'INTEGRAM' : 'NÃO integram') + ' a base do ICMS em 2027 (tema controvertido — entendimento das SEFAZ vs. decisões judiciais).');
+    if (ctx.icmsRegular) L.push('IBS/CBS ' + (pr.ibsCbsNaBaseIcms2027 ? 'INTEGRAM' : 'NÃO integram') + ' a base do ICMS em 2027 (tema controvertido — entendimento das SEFAZ vs. decisões judiciais)' + (pr.ibsCbsNaBaseIcms2027 ? ', na venda e no ICMS da NF de compra' + (pr.liminarCbsForaBaseIcms2027 ? '; por LIMINAR judicial da empresa, a CBS fica fora da base do ICMS da venda' : '') : '') + '.');
+    L.push('IBS/CBS 2027 sem o ICMS e o ISS na base (LC 214, art. 12, § 2º, V, de 2026 a 2032).');
     if (emp.regime !== 'SN') L.push('PIS/Cofins 2026 sem o ICMS na base: na venda (STF, Tema 69)' + (emp.regime === 'LR' ? '; crédito da compra sobre produtos − descontos − ICMS destacado na NF (Lei 14.592/2023), sem frete, seguro, despesas e IPI' : '') + (pr.excluirStBasePisCofins ? '; na venda, também sem o ICMS-ST (STJ, Tema 1125)' : '') + '.');
     L.push('Margem desejada medida ' + (pr.baseMargem === 'liquida' ? 'APÓS IRPJ/CSLL (lucro líquido)' : 'ANTES de IRPJ/CSLL (margem de contribuição)') + ', sobre o valor da mercadoria (sem tributos por fora).');
     L.push('Despesas variáveis incidentes sobre ' + (pr.baseDespesas === 'mercadoria' ? 'o valor da mercadoria' : 'o total cobrado do cliente (com tributos por fora)') + '.');

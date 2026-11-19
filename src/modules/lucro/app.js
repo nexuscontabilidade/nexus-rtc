@@ -56,8 +56,23 @@
       if (p.cenario === '2027') p.ref2027 = M.referencia2027(); // alíquotas do RTC (entram na chave do cache)
       return p;
     },
-    /** Cenário da simulação, comum a todas as empresas e análises do módulo */
-    cenario: function () { return this.d.cenario === '2027' ? '2027' : '2026'; },
+    /** Cenário da simulação, comum a todas as empresas e análises do módulo (2027 só com acesso ao RTC Comparativo) */
+    cenario: function () { return M.cenarioEfetivo(this.d.cenario); },
+    /** O usuário pode usar o cenário 2027? (exige o módulo RTC Comparativo) */
+    pode2027: function () { return M.pode2027(); },
+    /**
+     * Troca o cenário: cada cenário guarda os próprios valores (itens, parâmetros e análise). O que se altera em 2027 não
+     * muda 2026, e vice-versa. Devolve o resultado da troca (ou null quando não troca).
+     */
+    trocarCenario: function (novo) {
+      if (novo !== '2026' && novo !== '2027') return null;
+      if (novo === '2027' && !M.pode2027()) { D.toast(M.MSG_SEM_2027, 'erro'); return null; }
+      if ((this.d.cenario === '2027' ? '2027' : '2026') === novo) return null;
+      var r = MOD.trocarCenario(this.d, novo);
+      cache = {};
+      gravar();
+      return r;
+    },
     calculadora: function (item, p) {
       var chave = JSON.stringify([item.quantidade, item.compra, item.trib, item.cbsIbs, item.venda.comissao, item.venda.taxaCartao, p]);
       var c = cache[item.id];
@@ -132,7 +147,8 @@
       N.store.setPath(e, path, val);
       return path === 'regime' || path === 'uf';
     }
-    if (scope === 'mod') { // configuração do módulo inteiro (cenário)
+    if (scope === 'mod') { // configuração do módulo inteiro (cenário): guarda os valores do atual e traz os do novo
+      if (path === 'cenario') { var tr = L.trocarCenario(val); if (tr) avisarTroca(tr); return true; }
       N.store.setPath(d, path, val);
       return true;
     }
@@ -140,7 +156,7 @@
       var ep = L.empresa();
       if (!ep) return false;
       N.store.setPath(ep.params, path, val);
-      return path === 'considerarIrpjCsll' || path === 'aplicarAdicional' || path === 'ibsCbsNaBaseIcms' || path === 'despesasSobreTotal' || path === 'manterIpi2027';
+      return path === 'considerarIrpjCsll' || path === 'aplicarAdicional' || path === 'ibsCbsNaBaseIcms' || path === 'liminarCbsForaBaseIcms' || path === 'despesasSobreTotal' || path === 'manterIpi2027';
     }
     if (scope === 'ana') {
       var an = L.analise();
@@ -164,7 +180,7 @@
       }
       N.store.setPath(it, path, val);
       tocar(L.analise());
-      return ['venda.modo', 'venda.descontoTipo', 'compra.daeCodigo', 'trib.icmsSt', 'cbsIbs.regime'].indexOf(path) >= 0;
+      return ['venda.modo', 'venda.descontoTipo', 'compra.daeCodigo', 'compra.fornecedorSimples', 'trib.icmsSt', 'cbsIbs.regime'].indexOf(path) >= 0;
     }
     if (scope === 'ui') {
       N.store.setPath(d.ui, path, val);
@@ -174,6 +190,12 @@
       return true;
     }
     return false;
+  }
+
+  /** Aviso da troca de cenário (na primeira vez, o novo cenário começa com uma cópia dos valores do anterior) */
+  function avisarTroca(tr) {
+    D.toast('Cenário ' + tr.para + ' selecionado: ' + M.CENARIOS_INFO[tr.para] + '.' +
+      (tr.copiados ? ' Ele começou com os valores de ' + tr.de + '; daqui em diante, o que você alterar em um cenário não muda o outro.' : ' Os valores de ' + tr.de + ' ficaram guardados como estavam.'));
   }
 
   function marcarInvalido(t, msg) {
@@ -208,13 +230,14 @@
       if (inp === exceto) return;
       inp.value = r && !r.erro && r.margem != null ? F.inputValue(r.margem * 100, 'pct') : '';
     });
+    var modoTela = LC.views.modoEfetivo ? LC.views.modoEfetivo(it.venda.modo, L.params(L.analise())) : it.venda.modo;
     D.$$('input[data-scope="item"][data-id="' + itemId + '"][data-path="venda.modo"]').forEach(function (rad) {
-      rad.checked = rad.value === it.venda.modo;
+      rad.checked = rad.value === modoTela;
       var opt = rad.closest('.nx-seg-opt'); if (opt) opt.classList.toggle('is-on', rad.checked);
     });
     // o texto do modo acompanha a troca automática para "preço informado" ao digitar o preço
     var pn = L.params(L.analise());
-    D.$$('.lc-modo-nota').forEach(function (el) { if (LC.views.modoTexto) el.textContent = LC.views.modoTexto(it.venda.modo, pn); });
+    D.$$('.lc-modo-nota').forEach(function (el) { if (LC.views.modoTexto) el.textContent = LC.views.modoTexto(modoTela, pn); });
   }
 
   /** Filtro da tela Venda: redesenha só a lista (o campo de busca mantém o foco) */
@@ -497,6 +520,8 @@
       D.confirmar('Aplicar a todos os itens', 'Aplicar o modo de preço, o markup, o desconto, a comissão e a taxa de cartão padrão a todos os ' + an.itens.length + ' itens? Preços informados item a item são mantidos quando o modo for "Preço informado"; no modo "Preço sem PIS/Cofins", o preço atual de cada item vira o preço de hoje.', 'Aplicar').then(function (ok) {
         if (!ok) return;
         var vp = an.vendaPadrao;
+        // "Preço sem PIS/Cofins" só existe no cenário 2027: em 2026 a venda padrão vale como preço informado
+        if (vp.modo === 'PRECO_SEM_PIS_COFINS' && L.cenario() !== '2027') vp = Object.assign({}, vp, { modo: 'PRECO_INFORMADO' });
         an.itens.forEach(function (it) {
           var preco = it.venda.precoVenda;
           var hoje = Number(it.venda.precoAtual) > 0 ? it.venda.precoAtual : null;
@@ -519,6 +544,14 @@
       D.baixar(LC.importar.modelo(), 'modelo-lucratividade-por-item.xlsx');
       D.toast('Modelo baixado: preencha as abas Compra e Tributação de venda.');
     },
+    'lc-exportar-2027': function () {
+      var an = L.analise();
+      if (!an || !an.itens.length) { D.toast('Cadastre ou importe os produtos antes de exportar.', 'erro'); return; }
+      if (!M.pode2027()) { D.toast(M.MSG_SEM_2027, 'erro'); return; }
+      var nome = String(an.nome || 'analise').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      D.baixar(LC.importar.planilhaAtualizacao(an, L.d.cenario, L.empresa()), 'atualizacao-2027-' + (nome || 'analise') + '.xlsx');
+      D.toast('Planilha baixada com ' + an.itens.length + ' produto(s). Atualize com a nota de 2027, informe a CBS e o IBS e importe de volta em Importar planilha.');
+    },
     'lc-importar': function () {
       var an = L.analise();
       if (!an) { D.toast('Crie uma análise antes de importar.', 'erro'); return; }
@@ -531,6 +564,11 @@
         N.rtc.planilha.lerArquivo(f).then(function (abas) {
           var r = LC.importar.processar(abas, an.itens);
           r.arquivo = f.name;
+          if (r.atualizacao) {
+            // planilha de atualização: só para quem tem o cenário 2027; o plano compara com os valores de 2027 de cada produto
+            if (!M.pode2027()) { D.toast(M.MSG_SEM_2027, 'erro'); return; }
+            r.plano = LC.importar.planejarAtualizacao(r.atualizacao, an.itens, L.d.cenario);
+          }
           L.importacao = r;
           rerender();
           setTimeout(function () { var el = document.getElementById('lc-importacao'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 40);
@@ -541,6 +579,30 @@
     'lc-confirmar-importacao': function () {
       var imp = L.importacao, an = L.analise();
       if (!imp || !an) return;
+      if (imp.plano) {
+        // atualização para 2027: grava só no cenário 2027 (o cenário 2026 fica como está)
+        var ativo = L.d.cenario, nAt = 0, nNovo = 0;
+        imp.plano.linhas.forEach(function (l) {
+          if (l.item) {
+            if (!l.mudancas.length) return;
+            var alvo = MOD.editarNoCenario(l.item, '2027', ativo, 'item');
+            alvo.quantidade = l.novo.quantidade;
+            alvo.compra = N.store.clone(l.novo.compra);
+            nAt++;
+          } else {
+            var it = novoItem(an);
+            it.codigo = l.novo.codigo; it.descricao = l.novo.descricao; it.ncm = l.novo.ncm; it.quantidade = l.novo.quantidade;
+            it.compra = Object.assign(it.compra, N.store.clone(l.novo.compra));
+            an.itens.push(it);
+            nNovo++;
+          }
+        });
+        L.importacao = null; cache = {};
+        garantirSelecao(); tocar(an); gravar();
+        D.toast(nAt + ' produto(s) atualizado(s) no cenário 2027' + (nNovo ? '; ' + nNovo + ' produto(s) novo(s)' : '') + '. O cenário 2026 ficou como estava.' + (L.cenario() !== '2027' ? ' Abra o cenário 2027 para ver.' : ''));
+        rerender();
+        return;
+      }
       var n = 0, nt = 0, np = 0;
       if (imp.compra) {
         imp.compra.itens.forEach(function (x, i) {
@@ -568,7 +630,8 @@
       D.toast(imp.compra ? n + ' item(ns) importado(s); ' + np + ' com preço de venda' + (nt ? '; ' + nt + ' com tributação de venda' : '') + '.' : 'Tributação aplicada a ' + nt + ' item(ns).');
       rerender();
     },
-    'lc-cancelar-importacao': function () { L.importacao = null; rerender(); }
+    'lc-cancelar-importacao': function () { L.importacao = null; rerender(); },
+    'lc-cenario-bloqueado': function () { D.toast(M.MSG_SEM_2027, 'erro'); }
   };
   L.acoes = ACOES;
 
@@ -579,6 +642,12 @@
     var fn = ACOES[b.getAttribute('data-acao')];
     if (fn) { ev.preventDefault(); fn(b.dataset, ev); }
   }
+
+  /** Opção 2027 dos seletores de cenário: em cinza, com cadeado, para quem não tem o RTC Comparativo */
+  function opcao2027() {
+    return M.pode2027() ? null : { bloqueado: true, titulo: 'Exige o módulo RTC Comparativo', acao: 'lc-cenario-bloqueado' };
+  }
+  L.opcao2027 = opcao2027;
 
   // ------------------------------------------------------------------ barra de contexto
   function contexto(rota) {
@@ -597,8 +666,8 @@
       '<label class="nx-ctx-field"><span>Análise</span><span class="nx-input-wrap is-select"><select class="nx-input" data-scope="ui" data-path="analiseId" aria-label="Análise">' +
         (ans.length ? ans.map(function (a) { return '<option value="' + esc(a.id) + '"' + (an && a.id === an.id ? ' selected' : '') + '>' + esc(a.nome) + ' (' + a.itens.length + (a.itens.length === 1 ? ' item' : ' itens') + ')</option>'; }).join('') : '<option value="">Nenhuma análise</option>') +
       '</select></span></label>' +
-      U.segmento({ compacto: true, scope: 'mod', path: 'cenario', valor: L.cenario(), rotulo: 'Cenário', dica: 'Vale para todas as empresas e análises do módulo. 2026: ICMS + PIS/Cofins. 2027: ICMS + CBS e IBS por fora (LC 214/2025), com as regras do RTC Comparativo.',
-        opcoes: [['2026', '2026', M.CENARIOS_INFO['2026']], ['2027', '2027', M.CENARIOS_INFO['2027']]] }) +
+      U.segmento({ compacto: true, scope: 'mod', path: 'cenario', valor: L.cenario(), rotulo: 'Cenário', dica: 'Vale para todas as empresas e análises do módulo. 2026: ICMS + PIS/Cofins. 2027: ICMS + CBS e IBS por fora (LC 214/2025), com as regras do RTC Comparativo. Cada cenário guarda os próprios valores: o que você altera em um não muda o outro.',
+        opcoes: [['2026', '2026', M.CENARIOS_INFO['2026']], ['2027', '2027', M.CENARIOS_INFO['2027'], opcao2027()]] }) +
       '<div class="nx-ctx-actions">' + U.botao('Nova análise', 'lc-nova-analise', { classe: 'sm' }) +
         (an ? U.botao('Renomear', 'lc-renomear-analise', { classe: 'sm' }) + U.botao('Excluir análise', 'lc-excluir-analise', { classe: 'sm danger' }) : '') + '</div>' +
       '<div class="nx-ctx-summary" data-lc-live="ctx-resumo">' + LIVE['ctx-resumo'](L) + '</div>' +
@@ -624,6 +693,7 @@
       var sync = N.integracao.puxar('lucro');
       if (sync && sync.novos) { cache = {}; setTimeout(function () { D.toast(N.integracao.mensagem(sync)); }, 50); }
     }
+    if (L.d.cenario === '2027' && !M.pode2027()) { MOD.trocarCenario(L.d, '2026'); cache = {}; gravar(); } // sem o RTC, só 2026
     garantirSelecao();
     if (info && info.trocouRota && rota === 'compra' && !L.manterFicha) L.d.ui.itemAberto = null; // ficha só abre ao clicar no item
     L.manterFicha = false;
@@ -696,14 +766,18 @@
     },
     /** Seletor do cenário no painel "Etapas do módulo" do menu inicial */
     painelInicio: function () {
-      var c = L.cenario();
+      var c = L.cenario(), pode = M.pode2027();
       function opc(v, tit, sub) {
         var on = c === v;
-        return '<button type="button" class="lc-cen-opt' + (on ? ' is-on' : '') + '" data-inicio-mod="lucro" data-inicio-acao="cenario" data-valor="' + v + '" aria-pressed="' + on + '">' +
-          '<b>' + tit + '</b><small>' + sub + '</small></button>';
+        var bloq = v === '2027' && !pode;
+        return '<button type="button" class="lc-cen-opt' + (on ? ' is-on' : '') + (bloq ? ' is-bloqueado' : '') + '" data-inicio-mod="lucro" data-inicio-acao="cenario" data-valor="' + v + '"' +
+          (bloq ? ' aria-disabled="true" title="' + esc(M.MSG_SEM_2027) + '"' : ' aria-pressed="' + on + '"') + '>' +
+          '<b>' + (bloq ? N.shell.icone('cadeado', 'lc-cen-cadeado') : '') + tit + '</b><small>' + (bloq ? 'Exige o módulo RTC Comparativo' : sub) + '</small></button>';
       }
       return '<div class="lc-cenario-ini"><div class="lc-cenario-txt"><span class="nx-eyebrow">Cenário da simulação</span>' +
-        '<p>Escolha o ano das regras tributárias. Vale para todas as empresas e análises do módulo e pode ser trocado a qualquer momento.</p></div>' +
+        '<p>' + (pode ? 'Escolha o ano das regras tributárias. Vale para todas as empresas e análises do módulo e pode ser trocado a qualquer momento.'
+          : 'O cenário 2027 (reforma tributária) usa as regras do RTC Comparativo e fica liberado junto com esse módulo.') +
+        (pode ? ' Cada cenário guarda os próprios valores: o que você altera em 2027 não muda 2026, e vice-versa.' : '') + '</p></div>' +
         '<div class="lc-cen-opts" role="group" aria-label="Cenário da simulação">' +
           opc('2026', '2026 · regras atuais', 'ICMS + PIS e Cofins (ou DAS)') +
           opc('2027', '2027 · reforma tributária', 'ICMS + CBS e IBS por fora (LC 214/2025)') +
@@ -711,9 +785,8 @@
     },
     acaoInicio: function (acao, ds) {
       if (acao !== 'cenario' || (ds.valor !== '2026' && ds.valor !== '2027')) return;
-      L.d.cenario = ds.valor;
-      gravar();
-      D.toast('Cenário ' + ds.valor + ' selecionado: ' + M.CENARIOS_INFO[ds.valor] + '.');
+      var tr = L.trocarCenario(ds.valor);
+      if (tr) avisarTroca(tr);
     },
     iniciar: iniciar,
     render: render,

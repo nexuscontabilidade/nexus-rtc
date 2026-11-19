@@ -115,6 +115,9 @@ td.lc-dica { text-decoration: underline dotted rgba(250, 237, 229, 0.3); text-un
 .lc-celula-pv .nx-input { padding: 6px 8px; font-size: 0.86rem; }
 .lc-celula-pv .nx-prefix { font-size: 0.74rem; }
 .nx-seg-opt.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.nx-seg-opt.is-bloqueado { filter: grayscale(1); }
+.nx-seg-opt.is-bloqueado:hover { background: none; }
+.nx-seg-opt .nx-cadeado { width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; }
 .lc-venda-padrao .nx-card-body > .nx-btn { margin-top: 6px; }
 
 @media (max-width: 560px) {
@@ -149,6 +152,9 @@ td.lc-dica { text-decoration: underline dotted rgba(250, 237, 229, 0.3); text-un
 .lc-cen-opt:focus-visible { outline: 2px solid var(--brand-bright); outline-offset: 2px; }
 .lc-cen-opt.is-on { border-color: rgba(247, 81, 31, 0.7); background: var(--brand-wash); box-shadow: var(--glow-sm); }
 .lc-cen-opt.is-on b { color: var(--brand-soft); }
+.lc-cen-opt.is-bloqueado { cursor: not-allowed; opacity: .5; filter: grayscale(1); }
+.lc-cen-opt.is-bloqueado:hover { border-color: var(--line-strong); }
+.lc-cen-cadeado { width: 13px !important; height: 13px !important; margin-right: 6px; vertical-align: -1px; }
 .lc-cen-opt.is-on::after { content: "selecionado"; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-bright); margin-top: 2px; }
 
 /* cartão CBS e IBS (Parâmetros, cenário 2027) */
@@ -199,3 +205,17 @@ td.lc-dica { text-decoration: underline dotted rgba(250, 237, 229, 0.3); text-un
 .lc-descont > .is-total { background: var(--brand-wash); }
 .lc-descont > .is-total dt, .lc-descont > .is-total dd { color: var(--ink); font-weight: 700; }
 .lc-descont-nota { margin: 2px 0 12px; }
+
+/* cenário 2027: produto com os mesmos dados de 2026 (sem CBS e IBS destacados na nota) */
+.lc-selo-27 { display: inline-flex; vertical-align: -3px; margin-left: 6px; color: var(--warn, #f5b84a); cursor: help; }
+.lc-selo-27 svg, .lc-ico-27 { width: 15px; height: 15px; }
+.lc-ico-27 { display: inline-block; vertical-align: -3px; color: var(--warn, #f5b84a); }
+.lc-selo-27:focus-visible { outline: 2px solid var(--brand-bright); outline-offset: 2px; border-radius: 4px; }
+.lc-cod { white-space: nowrap; }
+.lc-aviso-27 { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 10px; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(245, 184, 74, 0.4); background: rgba(245, 184, 74, 0.08); font-size: 0.82rem; color: var(--ink-dim); }
+.lc-aviso-27 svg { flex: none; width: 16px; height: 16px; margin-top: 1px; color: var(--warn, #f5b84a); }
+.lc-aviso-27 b { color: var(--ink); }
+.lc-nf27 { margin: 4px 0 8px; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--line-strong); }
+.lc-nf27 .nx-note { margin-bottom: 0; }
+
+.nx-import-msgs.is-info h4 { color: var(--info, #8fb8f0); }

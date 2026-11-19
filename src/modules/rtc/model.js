@@ -72,6 +72,7 @@
         excluirStBaseCbs: false,
         ipiNaBaseIcms: false,
         ibsCbsNaBaseIcms2027: true,
+        liminarCbsForaBaseIcms2027: false, // liminar judicial da empresa: CBS fora da base do ICMS da venda (o IBS continua)
         valorProdutos2027: 'mesmo',   // mesmo | sem_pis_cofins | manual
         valorUnitario2027Manual: null,
         baseMargem: 'operacional',    // operacional | liquida

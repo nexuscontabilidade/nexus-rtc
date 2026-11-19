@@ -75,16 +75,16 @@
   };
 
   function tabela(L) {
-    var lista = L.resultados();
+    var lista = L.resultados(), p = L.params(L.analise());
     var rows = lista.map(function (x) {
       var it = x.item, r = x.r, id = esc(it.id);
       function cel(campo, cls) { return '<td class="num' + (cls ? ' ' + cls : '') + '" data-lc-live="res-cel" data-lc-id="' + id + '|' + campo + '">' + LC.live['res-cel'](L, it.id + '|' + campo) + '</td>'; }
       var pv = !r.erro ? r.pv : it.venda.precoVenda;
-      return '<tr><td><button type="button" class="nx-link-btn" data-acao="lc-selecionar-item" data-id="' + id + '" data-rota="venda" title="Abrir a tela do item"><strong>' + esc(it.codigo || '—') + '</strong></button><small class="nx-obs">' + esc(it.descricao || 'Item sem descrição') + '</small></td>' +
+      return '<tr><td><button type="button" class="nx-link-btn" data-acao="lc-selecionar-item" data-id="' + id + '" data-rota="venda" title="Abrir a tela do item"><strong>' + esc(it.codigo || '—') + '</strong></button>' + LC.views.selo2027(r.compra) + '<small class="nx-obs">' + esc(it.descricao || 'Item sem descrição') + '</small></td>' +
         '<td class="num">' + F.num(Number(it.quantidade) || 0, (Number(it.quantidade) || 0) % 1 ? 4 : 0) + '</td>' +
         '<td class="num">' + (r.custoLiquidoUnit != null ? F.unit(r.custoLiquidoUnit) : '—') + '</td>' +
         '<td class="num lc-celula-pv"><span class="nx-input-wrap has-prefix"><span class="nx-prefix">R$</span><input class="nx-input is-num" type="text" inputmode="decimal" autocomplete="off" data-scope="item" data-id="' + id + '" data-path="venda.precoVenda" data-type="unit" value="' + esc(pv != null ? F.inputValue(pv, 'unit') : '') + '" aria-label="Preço de venda de ' + esc(it.codigo || it.descricao || 'item') + '"></span>' +
-          (it.venda.modo !== 'PRECO_INFORMADO' ? '<small class="nx-obs">' + ({ MARKUP_COM_DESPESAS: 'markup 1', MARKUP_SEM_DESPESAS: 'markup 2', PRECO_SEM_PIS_COFINS: 'sem PIS/Cofins' }[it.venda.modo] || '') + '</small>' : '') + '</td>' +
+          (LC.views.modoEfetivo(it.venda.modo, p) !== 'PRECO_INFORMADO' ? '<small class="nx-obs">' + ({ MARKUP_COM_DESPESAS: 'markup 1', MARKUP_SEM_DESPESAS: 'markup 2', PRECO_SEM_PIS_COFINS: 'sem PIS/Cofins' }[it.venda.modo] || '') + '</small>' : '') + '</td>' +
         cel('pld') + cel('lucroTotal') + cel('margem') + cel('faixaPreco') +
         '<td data-lc-live="res-cel" data-lc-id="' + id + '|alertas">' + LC.live['res-cel'](L, it.id + '|alertas') + '</td></tr>';
     }).join('');

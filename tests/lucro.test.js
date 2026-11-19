@@ -192,7 +192,7 @@
 
   test('Lucratividade · modelo novo: compra (13 colunas) e venda (3) na mesma linha, com cabeçalho legível', function () {
     var cols = I.COLUNAS_MODELO.map(function (c) { return c.rotulo + (c.obrig ? ' *' : ''); });
-    eq(I.COLUNAS_MODELO.length, 21, '13 da compra + 3 da venda + 4 da tributação da venda + CBS e IBS (2027)');
+    eq(I.COLUNAS_MODELO.length, 24, '13 da compra + 3 da venda + 4 da tributação da venda + CBS e IBS (2027) + fornecedor e nota de 2027');
     eq(cols[0], 'Código do produto *'); eq(cols[12], 'Código do DAE'); eq(cols[13], 'Preço de venda por unidade (R$)'); eq(cols[15], 'Taxa de cartão (%)');
     var csv = 'COMPRA;;;;;;;;;;;;;VENDA;;\n' + cols.join(';') + '\n' +
       'A100;Torneira metal;84818019;10;1.000,00;0,00;50,00;6,00;50,00;10,00;120,00;80,00;1023;180,00;3;2,5\n' +
@@ -213,7 +213,7 @@
 
   test('Lucratividade · planilha com a tributação da venda (ICMS, PIS e Cofins) já preenchida', function () {
     var cols = I.COLUNAS_MODELO.map(function (c) { return c.rotulo + (c.obrig ? ' *' : ''); });
-    eq(cols.slice(16).join(' | '), 'ICMS-ST na venda | Alíquota do ICMS na venda (%) | Redução da base do ICMS (%) | PIS/Cofins na venda | CBS e IBS do item (2027)');
+    eq(cols.slice(16, 21).join(' | '), 'ICMS-ST na venda | Alíquota do ICMS na venda (%) | Redução da base do ICMS (%) | PIS/Cofins na venda | CBS e IBS do item (2027)');
     var csv = cols.join(';') + '\n' +
       'A1;Torneira;84818019;10;1000,00;;;;;;120,00;;;180,00;3;2,5;Não;20;0;Normal\n' +
       'B2;Óleo;27101932;20;800,00;;;;;;96,00;64,00;1031;45,00;;;Sim;;;Monofásico\n' +

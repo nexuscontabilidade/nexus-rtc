@@ -18,6 +18,7 @@ A plataforma Nexus tem dois módulos, separados no menu:
 - **Módulos por usuário:** na ficha do cliente, o administrador marca os módulos liberados: **RTC Comparativo**, **Lucratividade por Item** ou os dois.
   - É preciso marcar ao menos um.
   - O módulo não liberado continua aparecendo para o cliente, **em cinza** e com cadeado ("Não liberado no seu acesso"), no menu de módulos, na barra lateral e no seletor do topo. Ele não abre; o clique mostra o aviso para falar com a Nexus Contabilidade.
+  - O **cenário 2027** da Lucratividade exige o **RTC Comparativo**, de onde vêm as regras e as alíquotas de 2027. Sem o RTC, a opção 2027 aparece em cinza, com cadeado, nos três seletores (menu de etapas, barra do topo e Parâmetros), e o clique mostra o aviso. Um 2027 gravado antes volta para 2026. Administradores acessam tudo.
   - O cliente só vê os módulos marcados no menu inicial, na barra lateral e no seletor do topo.
   - Um endereço direto de outro módulo volta ao menu com o aviso "Seu acesso não inclui o módulo…".
   - Administradores acessam todos os módulos.
@@ -99,7 +100,9 @@ Fórmulas: `Σ = a_ICMS + (a_PIS + a_Cofins)(1 − a_ICMS) + comissão + cartão
 
 ### Cenário 2027 (CBS e IBS)
 
-O cenário vale para todas as empresas e análises do módulo e fica gravado com os dados (`cenario` em `nexus.lucro.v1`). Pode ser trocado em três lugares:
+O cenário vale para todas as empresas e análises do módulo e fica gravado com os dados (`cenario` em `nexus.lucro.v1`).
+
+**Cada cenário guarda os próprios valores.** O que se altera em 2027 não muda 2026, e vice-versa: quantidade, compra, venda, tributação e tratamento de CBS e IBS do item; parâmetros da empresa; regime e venda padrão da análise. Na primeira vez que um cenário é aberto, ele começa com uma cópia dos valores do outro. A identificação do produto (código, descrição, NCM), os nomes e o cadastro da empresa são comuns aos dois. Tecnicamente, o cenário ativo fica nos campos do objeto e o outro em `porCenario[ano]` (`modelo.trocarCenario`, `modelo.noCenario`). A integração manda ao RTC a nota de 2026 e o tratamento e as premissas de 2027. O **2027 só é liberado para quem tem acesso ao RTC Comparativo** (`motor.pode2027`, `motor.cenarioEfetivo`). Pode ser trocado em três lugares:
 - no menu inicial, no painel **Etapas do módulo**, em **Cenário da simulação**;
 - na barra do topo (**Cenário 2026 | 2027**);
 - em **Parâmetros**.
@@ -109,12 +112,23 @@ O cenário vale para todas as empresas e análises do módulo e fica gravado com
 **2027:** as regras e as alíquotas do RTC Comparativo (LC 214/2025):
 - **Alíquotas:** as de **Parâmetros e regras do RTC**. A CBS é a referência menos 0,1 ponto percentual (arts. 347 e 349); a referência ainda é estimada, até a Resolução do Senado. O IBS é 0,05% estadual + 0,05% municipal (art. 344). Quando a alíquota oficial for publicada e atualizada no RTC, a Lucratividade usa o novo valor.
 - **Venda:**
-  - CBS e IBS **por fora**, sobre (PLD − ICMS) (art. 12, § 2º, V). São somados ao preço e pagos pelo cliente; não entram no faturamento, na DRE nem no lucro (DL 1.598/1977, art. 12, § 4º).
+  - CBS e IBS **por fora**, sobre (PLD − ICMS). O ICMS e o ISS ficam fora da base de 2026 a 2032 (art. 12, § 2º, V); como o módulo trata de mercadorias, não há ISS nas operações. São somados ao preço e pagos pelo cliente; não entram no faturamento, na DRE nem no lucro (DL 1.598/1977, art. 12, § 4º).
   - **ICMS com CBS e IBS na base**, conforme orientação da SEFAZ-SP e da SEFAZ-MG: ICMS = PLD × t(1 + k) ÷ (1 + t·k).
+  - **Liminar** (chave em Parâmetros, só aparece com a premissa acima ligada): para a empresa que obteve decisão judicial, a CBS sai da base do ICMS das vendas e o IBS continua: ICMS = PLD × t(1 + i) ÷ (1 + t·i). O ICMS da nota de compra segue o fornecedor. O RTC tem a mesma chave nas premissas do produto, e a integração leva as duas premissas da empresa para os produtos copiados.
   - **Comissão e cartão** sobre o total cobrado do cliente (com CBS e IBS), como no RTC.
   - As duas premissas têm chave própria em Parâmetros.
   - PIS e Cofins deixam de existir (EC 132/2023, ADCT, art. 126, II).
 - **Compra:** o fornecedor mantém o valor da mercadoria e acrescenta CBS e IBS por fora, sobre (valor da operação − ICMS destacado).
+  - **Nota fiscal de 2027:** na ficha do item (e na planilha, faixa "Fornecedor e nota de 2027"), informe a **CBS destacada** e o **IBS destacado** da nota de 2027 e use os valores dessa nota nos demais campos. Com eles, o cenário 2027 usa o **ICMS, a CBS e o IBS destacados na nota**, como o fisco calculou, sem projeção, e o crédito é o valor destacado (LC 214/2025, art. 47).
+  - **Planilha de atualização para 2027:** em Compra, **Exportar produtos para 2027** baixa um Excel com todos os produtos da análise e os valores atuais (os de 2026, até serem atualizados). O cliente atualiza a compra com a nota de 2027 (quantidade, preço unitário ou total, frete, IPI, ICMS, DAE, fornecedor do Simples) e informa a **CBS e o IBS destacados**. Em **Importar planilha**, o sistema reconhece o arquivo pela coluna "ID de controle" e mostra uma prévia: produtos atualizados, com CBS e IBS, novos, avisos, erros e o que muda em cada um. Os valores entram **só no cenário 2027**; o 2026 fica como está.
+    - Preço: vale o que mudou (unitário ou total); se os dois mudaram e não batem, vale o unitário, com aviso.
+    - Linha sem ID é ligada pelo código; sem código igual, vira produto novo. Produtos fora da planilha ficam como estão.
+    - Código, descrição e NCM de produtos já cadastrados não são alterados pela planilha.
+    - Uma nova exportação traz os valores de 2027 já atualizados, para continuar de onde parou.
+    - O botão só aparece para quem tem o cenário 2027 (acesso ao RTC Comparativo).
+  - **Sem a nota de 2027** (os mesmos dados de 2026), os valores de 2027 são projetados como descrito abaixo e o produto recebe um **sinal de alerta** ao lado do código: na Compra, no Resultado, na lista de itens e no custo da tela Venda. No Excel do relatório entra a coluna "Dados de 2027"; no PDF, o código ganha (*) com uma nota. A frase da Compra diz quantos produtos estão nessa situação.
+  - **Fornecedor do Simples Nacional** (chave na ficha e coluna na planilha) é a exceção: a CBS e o IBS dele ficam dentro do DAS, sem destaque por fora, e o produto não recebe o sinal. Se a nota informar a CBS e o IBS pagos por ele, esse valor vira crédito (art. 47, § 9º). O ICMS informado é o crédito indicado pelo optante (LC 123/2006, art. 23, § 1º), e por isso, em 2026, ele não sai da base do crédito de PIS/Cofins. A integração leva o fornecedor do Simples para o RTC e traz de volta.
+  - Com a premissa da SEFAZ ligada, o **ICMS da nota também é recalculado com a CBS e o IBS na base**: a alíquota efetiva da nota de 2026 (ICMS ÷ valor da operação) passa a incidir sobre (valor da operação + CBS + IBS). O fornecedor mantém o valor, o ICMS destacado sobe e o crédito de ICMS também. O RTC faz o mesmo quando o ICMS da NF é informado. Os valores de DAE continuam os informados.
   - **Lucro Real e Presumido** recuperam a CBS e o IBS integralmente (art. 47).
   - **Simples Nacional** não recupera: a CBS e o IBS da compra ficam no custo (art. 47, § 9º). Na venda, a CBS e o IBS ficam dentro do DAS.
   - O **IPI é zero** (ADCT, art. 126, III; LC 214/2025, art. 454), salvo produto da Zona Franca de Manaus, que tem chave em Parâmetros.
@@ -129,14 +143,15 @@ O cenário vale para todas as empresas e análises do módulo e fica gravado com
 - Lucro Presumido: 3,65% × (1 − ICMS).
 - Item com ICMS-ST: a base é o preço inteiro.
 - Simples Nacional e item sem PIS/Cofins na venda (monofásico, alíquota zero, isento, suspenso): o preço fica igual.
-- No cenário **2026**, o preço de hoje vale como está, e a tela mostra quanto ele cairá em 2027.
+- A opção só aparece no cenário **2027**. Um item nesse modo aparece, em 2026, como **Preço informado** (o preço de hoje), com uma nota.
 - As alíquotas do PIS e da Cofins de hoje ficam em Parâmetros, também no cenário 2027.
 - Ao escolher o modo, o preço que está na tela vira o preço de hoje. Em **Venda padrão da análise**, cada item usa o próprio preço.
 - Na integração, o RTC recebe o preço de hoje e calcula 2027 pelas próprias regras.
 
 Os testes conferem os números à mão:
-- A100: custo líquido de 2027 de R$ 934,00, lucro de R$ 349,06 e ICMS = 20% × (PLD + CBS + IBS).
-- O custo líquido de 2027 é o mesmo nos dois módulos: A100 R$ 934,00; MS 162 R$ 7.598,11.
+- A100: ICMS da nota de 2027 de R$ 129,21 (R$ 120,00 na NF de 2026), custo líquido de R$ 924,79, lucro de R$ 358,27 e ICMS da venda = 20% × (PLD + CBS + IBS). Sem a premissa da SEFAZ, o custo é R$ 934,00.
+- O custo líquido de 2027 é o mesmo nos dois módulos: A100 R$ 924,79; MS 162 R$ 7.571,46.
+- Com a liminar, o ICMS da venda = 20% × (PLD + IBS), nos dois módulos.
 
 ### Telas mais simples
 
@@ -212,7 +227,7 @@ Abra `tests/index.html` no navegador (115 testes) ou rode `node tests/node/rodar
 - item com ICMS-ST (1031) sem crédito de ICMS;
 - importação das planilhas.
 
-Os testes de `tests/lucro2027.test.js` cobrem o cenário 2027: alíquotas vindas do RTC, compra com CBS e IBS e IPI zero, venda com ICMS sobre (PLD + CBS + IBS), Presumido e Simples, alíquota zero, redução e ICMS-ST, a coluna da planilha, o mesmo custo líquido de 2027 nos dois módulos e o modo **Preço sem PIS/Cofins**. Neste último, o valor retirado é igual ao PIS e à Cofins que o mesmo preço paga em 2026, e há casos para Presumido, Simples, monofásico, ST, desconto em R$, o cenário 2026 e a integração.
+Os testes de `tests/lucro2027.test.js` cobrem o cenário 2027: alíquotas vindas do RTC, compra com CBS e IBS e IPI zero, venda com ICMS sobre (PLD + CBS + IBS), Presumido e Simples, alíquota zero, redução e ICMS-ST, a coluna da planilha, o mesmo custo líquido de 2027 nos dois módulos e o modo **Preço sem PIS/Cofins**. Neste último, o valor retirado é igual ao PIS e à Cofins que o mesmo preço paga em 2026, e há casos para Presumido, Simples, monofásico, ST, desconto em R$, o cenário 2026 e a integração. Também cobrem a trava do cenário 2027 para quem não tem o RTC.
 
 ## Estrutura
 

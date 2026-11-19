@@ -7,7 +7,7 @@
   function seletorCenario(L) {
     return U.segmento({ scope: 'mod', path: 'cenario', valor: L.cenario(), rotulo: 'Cenário da simulação', opcoes: [
       ['2026', '2026 · regras atuais', 'ICMS + PIS e Cofins (ou DAS)'],
-      ['2027', '2027 · reforma tributária', 'ICMS + CBS e IBS por fora (LC 214/2025)']] });
+      ['2027', '2027 · reforma tributária', 'ICMS + CBS e IBS por fora (LC 214/2025)', L.opcao2027()]] });
   }
 
   /** Cartão do cenário 2027: alíquotas de CBS e IBS (as do RTC) e premissas ligáveis */
@@ -23,12 +23,14 @@
       (estimado ? '<p class="nx-auto is-missing"><b>Alíquota da CBS ainda não oficial.</b> A alíquota de referência será fixada por Resolução do Senado (LC 214/2025, art. 349). O valor vem de Parâmetros e regras do RTC Comparativo e muda aqui quando for atualizado lá.</p>' : '');
     var simples = p.regime === 'SIMPLES';
     var premissas = (simples ? '' :
-        sw({ path: 'ibsCbsNaBaseIcms', rotulo: 'CBS e IBS na base do ICMS da venda', padrao: true, ajuda: 'Entendimento da SEFAZ-SP e da SEFAZ-MG em respostas a consultas: a partir de 2027, a CBS e o IBS integram a base do ICMS. Tema judicializado.' })) +
+        sw({ path: 'ibsCbsNaBaseIcms', rotulo: 'CBS e IBS na base do ICMS', padrao: true, ajuda: 'Entendimento da SEFAZ-SP e da SEFAZ-MG em respostas a consultas: a partir de 2027, a CBS e o IBS integram a base do ICMS. Vale para a venda e para o ICMS da nota de compra. Tema judicializado.' }) +
+        (p.ibsCbsNaBaseIcms !== false ? sw({ path: 'liminarCbsForaBaseIcms', rotulo: 'Liminar: excluir a CBS da base do ICMS', ajuda: 'Só para a empresa que obteve decisão judicial (liminar). A CBS sai da base do ICMS das vendas; o IBS continua. O ICMS da nota de compra segue o cálculo do fornecedor.' }) : '')) +
       sw({ path: 'despesasSobreTotal', rotulo: 'Comissão e cartão sobre o total cobrado do cliente', padrao: true, ajuda: 'O cartão e a comissão incidem sobre o que o cliente paga, já com a CBS e o IBS. Desligado: sobre o preço da mercadoria.' }) +
       sw({ path: 'manterIpi2027', rotulo: 'Manter o IPI da compra em 2027', ajuda: 'Só para produto com industrialização incentivada na Zona Franca de Manaus. Nos demais, o IPI é zero a partir de 2027 (EC 132/2023, ADCT, art. 126, III; LC 214/2025, art. 454).' });
     var regras = simples
       ? '<p>No <b>Simples Nacional</b>, a CBS e o IBS ficam dentro do DAS: informe abaixo a alíquota efetiva do DAS de 2027. Na compra, a CBS e o IBS cobrados pelo fornecedor ficam no custo, sem crédito (LC 214/2025, art. 47, § 9º).</p>'
-      : '<p><b>Na venda:</b> a CBS e o IBS são cobrados <b>por fora</b>: somados ao preço da mercadoria e pagos pelo cliente, sem reduzir o lucro (CF, art. 156-A, § 1º, IX). A base deles não tem o ICMS (LC 214/2025, art. 12, § 2º, V).</p>' +
+      : '<p><b>Na venda:</b> a CBS e o IBS são cobrados <b>por fora</b>: somados ao preço da mercadoria e pagos pelo cliente, sem reduzir o lucro (CF, art. 156-A, § 1º, IX). A base deles não tem o ICMS nem o ISS (LC 214/2025, art. 12, § 2º, V, de 2026 a 2032).</p>' +
+        '<p><b>ICMS:</b> com a premissa ligada, a CBS e o IBS entram na base do ICMS, na venda e na nota de compra (entendimento da SEFAZ). Com liminar judicial, a CBS sai da base do ICMS das vendas da empresa.</p>' +
         '<p><b>Na compra:</b> a CBS e o IBS destacados na nota entram no custo bruto e voltam integralmente como crédito (LC 214/2025, art. 47). PIS e Cofins deixam de existir (EC 132/2023, ADCT, art. 126, II).</p>';
     return U.cartao({ classe: 'lc-card-2027', eyebrow: 'Cenário 2027 · reforma tributária', titulo: 'CBS e IBS',
       sub: 'Mesmas regras e alíquotas do RTC Comparativo.',
@@ -55,8 +57,10 @@
       });
 
       var cCenario = U.cartao({ eyebrow: 'Cenário', titulo: 'Ano da simulação',
-        sub: 'Vale para todas as empresas e análises do módulo. Também pode ser trocado no menu de etapas e na barra do topo.',
-        corpo: seletorCenario(L) + (c27 ? '' : '<p class="nx-note">A partir de 2027, PIS e Cofins dão lugar à CBS e ao IBS (EC 132/2023 e LC 214/2025). Escolha 2027 para ver o efeito nos seus itens.</p>') });
+        sub: 'Vale para todas as empresas e análises do módulo. Cada cenário guarda os próprios valores (itens, parâmetros e análise): o que você altera em 2027 não muda 2026, e vice-versa. Também pode ser trocado no menu de etapas e na barra do topo.',
+        corpo: seletorCenario(L) + (c27 ? '' : L.pode2027()
+          ? '<p class="nx-note">A partir de 2027, PIS e Cofins dão lugar à CBS e ao IBS (EC 132/2023 e LC 214/2025). Escolha 2027 para ver o efeito nos seus itens.</p>'
+          : '<p class="nx-auto is-missing">' + esc(M.MSG_SEM_2027) + '</p>') });
 
       var aliq;
       if (p.regime === 'SIMPLES') {

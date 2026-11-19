@@ -591,7 +591,8 @@
         sw({ path: 'premissas.excluirStBasePisCofins', rotulo: 'Excluir o ICMS-ST da base de PIS/Cofins do substituído (STJ, Tema 1125)', ajuda: 'Avalie o risco e a situação processual da empresa.' }) +
         sw({ path: 'premissas.excluirStBaseCbs', rotulo: 'Excluir o ICMS-ST da base da CBS/IBS em 2027', ajuda: 'Interpretação do art. 12, § 2º, V, da LC 214/2025 — não pacificada.' }) +
         sw({ path: 'premissas.ipiNaBaseIcms', rotulo: 'Incluir o IPI na base do ICMS da entrada', ajuda: 'Regra geral: fora da base entre contribuintes para comercialização (LC 87, art. 13, § 2º).' }) +
-        sw({ path: 'premissas.ibsCbsNaBaseIcms2027', rotulo: 'IBS/CBS integram a base do ICMS em 2027', ajuda: 'Entendimento de SEFAZ (SP, MG) a partir da exigibilidade; tema judicializado. Desmarque para simular a tese contrária.' }) +
+        sw({ path: 'premissas.ibsCbsNaBaseIcms2027', rotulo: 'IBS/CBS integram a base do ICMS em 2027', ajuda: 'Entendimento de SEFAZ (SP, MG) a partir da exigibilidade; tema judicializado. Vale para a venda e para o ICMS da NF de compra. Desmarque para simular a tese contrária.' }) +
+        sw({ path: 'premissas.liminarCbsForaBaseIcms2027', rotulo: 'Liminar: excluir a CBS da base do ICMS em 2027', ajuda: 'Só para a empresa que obteve decisão judicial (liminar). A CBS sai da base do ICMS das vendas; o IBS continua. Só tem efeito com a opção acima marcada. O ICMS da NF de compra segue o fornecedor.' }) +
         '<div class="nx-form-grid">' + sel({ rotulo: 'Na análise “mesmo preço”, manter', path: 'premissas.manterPreco', largura: 'lg', opcoes: [['total', 'O total cobrado do cliente'], ['mercadoria', 'O valor da mercadoria (IBS/CBS acrescidos)']] }) + '</div>' +
         '</div></details>';
 
